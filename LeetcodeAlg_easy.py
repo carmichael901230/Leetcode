@@ -76,13 +76,13 @@ def reverse(x):
 #              Doing this until [x] <= [res], meaning [x] has same digits as [res] or [x] has one digit less than [res]
 #              If x has even digits, then at end [x] should == [res], if [x] has odd digits then [x] should == [res]//10               
 def isPalindrome(x):
-    if x<0 or (x!=0 and x%10==0): 
+    if x<0 or (x!=0 and x%10==0):
         return False
-    res = 0
-    while (x>res):
-        res = res*10 + x%10
-        x //= 10
-    return (x==res or x==res//10)
+    reverse = 0
+    while reverse<x:
+        reverse = reverse*10+x%10
+        x//=10
+    return x==reverse or reverse//10==x
 
 # 5.13 Roman to integer =================== URL: https://leetcode.com/problems/roman-to-integer/
 # Problem: Convert Roman numeral of type string to integer number of base 10, 
@@ -100,18 +100,18 @@ def isPalindrome(x):
 # Description: Build a dictionary which map from roman numeral to integer number,
 #              traverse each character of input string, and map from char to int.
 #              If previous char is smaller, such as "IX" where 'I' is less than 'X'
-#                 do subtraction, where "IX" = -1 + 10 = 9
+#              do subtraction, where "IX" = -1 + 10 = 9
 #              else do addition, such as "XI" = 10 + 1 = 11
 # Time complexity: O(n) simply traverse the input string
 def romanToInt(s):
-    num = 0
-    dict = {'M':1000, 'D':500, 'C':100, 'L':50, 'X':10, 'V':5, 'I':1}
-    for i in range(len(s)-1):
-        if (dict[s[i]] >= dict[s[i+1]]):
-            num += dict[s[i]]
-        else:
-            num -= dict[s[i]]
-    return (num + dict[s[-1]])
+    dic = {'I':1, 'V':5,'X':10,'L':50,'C':100,'D':500,'M':1000}     # maintain lookup table 
+    res = 0
+    for i in range(len(s)-1):       # iterate from beginning to second last char
+        if dic[s[i]] >= dic[s[i+1]]:            # if a larger char comes before a small char, addition
+            res += dic[s[i]]
+        else:                                   # if a smaller char comes before a large char, subtract
+            res -= dic[s[i]]
+    return res+dic[s[-1]]                   # always add the last char to [res]
 
 # 6.14 Longest Common Prefix =================== URL: https://leetcode.com/problems/longest-common-prefix/
 # Problem: Given a list of strings, find the longest common prefix of them and return,
@@ -134,12 +134,14 @@ def romanToInt(s):
 # Time Complexity: O(l) => l is the length of common prefix, since zip(*) and enumerate() take O(1),
 #                 and for loop stops when an un-match is detected
 def longestCommonPrefix(strs):
-    if not strs:
-        return ""
-    for i, letter_group in enumerate(zip(*strs)):
-        if len(set(letter_group)) > 1:          # combine duplicated elements as a single element using set(), 
-            return strs[0][:i]                  # after detecting any un-match, return all matched characters up to i
-    return min(strs)                            # if all elements in unzipped are match, return shortest string
+    unzipped = list(zip(*strs))             # unpack [strs] that char at same index are grouped together
+    res = ""
+    for el in unzipped:                     # iterate though each grouped chars
+        if len(set(el)) == 1:                   # grouped chars are same letter, add it to [res]
+            res += el[0]
+        else:                               # found a group has multiple letters, longest common prefix ends here
+            break
+    return res
 
 
 # 7.20 Valid parentheses ================== URL: https://leetcode.com/problems/valid-parentheses/
