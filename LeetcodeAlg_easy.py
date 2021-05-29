@@ -149,25 +149,26 @@ def longestCommonPrefix(strs):
 # 7.20 Valid parentheses ================== URL: https://leetcode.com/problems/valid-parentheses/
 # Problem: Given a string of parentheses including () [] {}, return True if all parentheses are valid
 #          Otherwise return False
-# Description: Create a dictionary where opening parentheses are values and closing parentheses are keys, also create an empty stack
-#              Iterate through string if char is a opening parenthesis(char in dict.value()) then append char into stack
-#              if char a closing parenthesis(char in dict.keys()) then pop the last element in stack, 
-#              [Note, stack is last in first out, which is same as parentheses, where last open first close]
-#              so the latest opened parenthesis will be popped first, if dict[char] != stack.pop() meaning opening and closing parentheses
-#              doesn't match. At last, the stack should be empty since every opening parenthesis pairs with a closing parenthesis
+# Description: Parentheses opened first is closed last, that we use "stack" to track its pair parenthesis
+#              Create a [lookup] dictionary where closing parentheses are keys and openging parenthese are values, 
+#              and create an empty [stack]. Iterate through string, if current character [c] is a opening parentheis
+#              that "c not in lookup.keys()", append the opening parenthisis to [stack]. Elsewise, "c in lookup.keys()" 
+#              that c is a  closing parenthesis, check if stack[-1] is same as [c]'s opening pair. If stack[-1] is
+#              equals to lookup[c], then pair matches and pop stack, otherwise return False since opening and 
+#              closing doesn't match. At the end of loop, return True if [stack] is empty, otherwise return False
 # Time Complexity: O(n)
-def isValid(s):
+def isValid(s: str) -> bool:
+    lookup = {')':'(', ']':'[', '}':'{'}            # maintain a loopup table 
     stack = []
-    dict = {"]":"[", "}":"{", ")":"("}
-    for char in s:
-        if char in dict.values():   
-            stack.append(char)                  # store opening parentheses in stack
-        elif char in dict.keys():               # encounter a closing parenthesis   
-            if stack == [] or dict[char] != stack.pop():           # compare stack top with dict[char] which is its opening parenthesis
+    for c in s:
+        if c not in lookup.keys():                  # encounter a opening parenthesis, add it to stack
+            stack.append(c) 
+        else:                                       # encounter a closing parenthesis, verify its pair in stack
+            if stack and stack[-1] == lookup[c]:
+                stack.pop()
+            else:
                 return False
-        else:
-            return False                        # handle other char besides of parenthesese
-    return stack == []                          # stack should be empty at the end
+    return len(stack) == 0
 
 # 8.21 Merge Two sorted lists ================================ URL: https://leetcode.com/problems/merge-two-sorted-lists/
 # Problem: Given two linked lists of numbers, both of them are sorted in ascending order,
