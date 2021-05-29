@@ -1316,4 +1316,26 @@ def partition(head: ListNode, x: int) -> ListNode:
     tailLess.next = dummyGreat.next             # append "greater" portion to the end of "less" portion
     tailGreat.next = None                       # append None to the end of "greater" potion
     return dummyLess.next               # return head of "less" portion
-        
+
+# 49.89 Gray Code ============================================================================= https://leetcode.com/problems/gray-code/
+# Problem: The gray code is a binary number system where two adjacent values differ in only one bit.
+#          Given an integer [n] representing the number of bits in the gray code, return a sequence of gray code.
+#          A gray code always starts with 0, Example n = 3
+#          [000, 001, 011, 010, 110, 111, 101, 100] is a sequence of gray code
+# Description: Iterate i from (0 to n), and maintain sequence as [res]. Every iteration, take existing elements in [res] in reversed order,
+#              and add 2**i to every element and append them to [res]. The reason is explained below
+#              Inspect sequence of n=3,
+#              1. 000
+#              2. 001
+#              3. 011      010
+#              4. 110      111     101     100
+#              Initially, only 0 is in sequence, sequence is [0]
+#              Take elements reversely from sequence, Add 2**0 to every elements, append them to sequence, sequence is [0, 1]
+#              Take elements reversely from sequence, Add 2**1 to every elements, append them to sequence, sequence is [0, 1, 11, 10] 
+#              Take elements reversely from sequence, Add 2**2 to every elements, append them to sequence, sequence is [0, 1, 11, 10, 110, 111, 101, 100] 
+# Time complexity: O(2^n)
+def grayCode(n: int) -> List[int]: 
+    res = [0]
+    for i in range(n):
+        res += [val+2**i for val in reversed(res)]
+    return res
