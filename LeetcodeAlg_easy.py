@@ -68,21 +68,23 @@ def reverse(x):
     r = int(str(s*x)[::-1])             # reverse numeric part
     return s*r * (r < 2**31)            # combine sign and numeric part, and check overflow
 
-# 4.9 Palindrome Number =============== URL: https://leetcode.com/problems/palindrome-number/
+# 4.9 Palindrome Number ========================================= URL: https://leetcode.com/problems/palindrome-number/
 # Problem: Check if an integer is palindrome without converting it to string, 
 #          a negative integer is not palindrome, since its first symbol '-' doesn't match with last numeric symbol
 # Description: Construct and reversed integer [res], keep grab last digit of x by x%10, and add it into [res].
 #              Then swift up [res] by a digit, by [res] *= 10.
 #              Doing this until [x] <= [res], meaning [x] has same digits as [res] or [x] has one digit less than [res]
-#              If x has even digits, then at end [x] should == [res], if [x] has odd digits then [x] should == [res]//10               
+#              If x has even digits, then at end [x] should == [res], if [x] has odd digits then [x] should == [res]//10  
+#              Corner case, if [x] is less than 0, return False. Or [x] is not zero but last digit is 0, since [x] can't 
+#              have leading, return False
 def isPalindrome(x):
-    if x<0 or (x!=0 and x%10==0):
+    if x<0 or (x!=0 and x%10==0):       # [x] less than 0, or [x]
         return False
     reverse = 0
-    while reverse<x:
-        reverse = reverse*10+x%10
-        x//=10
-    return x==reverse or reverse//10==x
+    while reverse<x:                    # extract number until [reverse] is equal or one digit longer than [x]
+        reverse = reverse*10+x%10               # add last digit of [x] to [reverse]
+        x//=10                                  # remove last digit from [x]
+    return x==reverse or reverse//10==x     # [reverse] can have either same digits as [x] or one more digit than [x]
 
 # 5.13 Roman to integer =================== URL: https://leetcode.com/problems/roman-to-integer/
 # Problem: Convert Roman numeral of type string to integer number of base 10, 
