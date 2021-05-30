@@ -187,6 +187,7 @@ def mergeTwoLists(l1, l2):
     else:
         l2.next = mergeTwoLists(l1, l2.next)    # recursively append smaller node
         return l2
+        
 # Description: Iteratively solution, iterate through both linked list concurrently, and compare value of nodes from different linked list,
 #              append the smaller node to [cur] node, keep doing until one of the linked list is empty, then append the rest nodes to [cur]
 # Time Complexity: O(min(n,m)) => n, m are number of nodes in each linked list
@@ -222,19 +223,21 @@ def uncommonFromSentences(A, B):
 # 10.26 Remove duplicates from sorted array ===================== URL: https://leetcode.com/problems/remove-duplicates-from-sorted-array/
 # Problem: Given a sorted array, remove duplicates in-place such that each element only appear once(space complexity is O(1)),
 #          return the length of array which has no duplicates.
-# Description: [newTail] points to the end of the sub-array without duplicates, if the [i]th elements is equal to [newTail] then skip [i] and move 
-#              onto next element, if [i]th element is not equal to [newTail], then swap [i]th element to [newTail+1], because [newTail] is the first
-#              element of a kind, and [i]th element is the first element of the other kind, swaping them will make this kind next to the new kind.
+# Description: Two pointers. Maintain two pointers [slow] and [fast], that [slow] track the tail index of non-duplicated list, and [fast]
+#              look for non-duplicates element to put at the end of non-duplicated list. Both [slow] and [fast] start at the beginning of 
+#              [nums], [fast] will skip numbers that are smaller or equals to [slow]. Once [fast] finds a number that is greater than 
+#              [slow], meaning a non-duplicated number is found swap [slow+1] and [fast], and increase [slow] by 1 to shift tail to right. 
+#              Loop until [fast] hit the end, return [slow+1] as the length of non-duplicated list
 # Time Complexity: O(n)
-def removeDuplicates(A):
-    if not A:
-        return 0
-    newTail = 0                   # newTail marks the index of the first element of previous kind
-    for i in range(1, len(A)):
-        if A[i] != A[newTail]:               # A[i] != A[newTail] means a new kind is found
-            newTail += 1            
-            A[newTail], A[i] = A[i], A[newTail]       # swap A[i] into the next index of newTail
-    return newTail + 1                       # the size of array without duplicates is the index of newTail + 1
+def removeDuplicates(nums: List[int]) -> int:
+    slow, fast = 0, 0
+    while fast<len(nums):
+        if nums[fast] <= nums[slow]:                            # duplicated number are smaller or equals to [slow], skip them
+            fast += 1
+        else:                                                   # if [fast]>[slow], then [fast] is a non-duplicated number, swap
+            slow = slow+1                                           # shift [slow] to next index for inserting new number
+            nums[fast], nums[slow] = nums[slow], nums[fast]
+    return slow+1
 
 # 11.27 Remove elements =========================== URL: https://leetcode.com/problems/remove-element/
 # Problem: Given an array [arr] and a value [val], remove [val] in-place(space complexity O(1)) and return a new length of array
