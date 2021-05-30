@@ -258,22 +258,20 @@ def removeElement(nums, val):
             start +=1
     return start
 
-# 12.28 Implement strStr() =========================== URL: https://leetcode.com/problems/implement-strstr/discuss/12814/My-answer-by-Python
+# 12.28 Implement strStr() =============================================================== URL: https://leetcode.com/problems/implement-strstr/
 # Problem: Find the first occurrence index of [needle] in [haystack]. Return -1 if [needle] is not found, return 0 if [needle] is empty.
 # Description: Iterate through [haystack] from index 0 to index len(haystack)-len(needle), use string slice and compare substring of [haystack] with
 #              [needle]. If [needle] is found => return index where [needle] is found in [haystack]
 # Time Complexity: O(n*k) => n is len(haystack), k is len(needle). In worse case, it iterate through entire string, and in each iteration it takes
 #                  O(k) to slice the string
-def strStr(haystack, needle):
-    if needle == "" or haystack == "":
+def strStr(haystack: str, needle: str) -> int:
+    if needle == "":
         return 0
-    else:
-        n_len = len(needle)
-        h_len = len(haystack)
-        for i in range(h_len - n_len+1):
-            if haystack[i:i+n_len] == needle:
-                return i
+    for i in range(len(haystack) - len(needle)+1):
+        if haystack[i:i+len(needle)] == needle:
+            return i
     return -1
+
 # 13.35 Search insert position ================= URL: https://leetcode.com/problems/search-insert-position/
 # Problem: Given a sorted list of integers and another integer, insert the integer into the right position in the list,
 #          and return the index where the integer is inserted
