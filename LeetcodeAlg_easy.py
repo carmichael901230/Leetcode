@@ -275,21 +275,22 @@ def strStr(haystack: str, needle: str) -> int:
 # 13.35 Search insert position ================= URL: https://leetcode.com/problems/search-insert-position/
 # Problem: Given a sorted list of integers and another integer, insert the integer into the right position in the list,
 #          and return the index where the integer is inserted
-# Description: Binary search list [nums], when sublist has only one element, compare target with the element. 
-#              If [element] >= target, means target should be inserted to the left of [element]
-#              else insert target to the right of element
-# Time Complexity: O(lg n), Binary search
-def searchInsert(nums, target):
-    N = len(nums)
-    if N == 1:
-        if nums[0] >= target:
-            return 0
+# Description: Binary search. Maintain [left] and [right] starting from 0, and len(nums) respectively. Take [mid] of [left] 
+#              and [right], compare nums[mid] with [target]. If equal, return mid. If [mid]>[target], move [right] to [mid]. 
+#              If [mid]<[target], move [left] to [mid+1]. Loop when left<right, if [target] doesn't exists in [nums], that
+#              no [mid] will be returned in the loop. Thus return [left] outside the loop as its inserting index
+# Time complexity: O(logn)
+def searchInsert(nums: List[int], target: int) -> int: 
+    left, right = 0, len(nums)
+    while left<right:
+        mid = (left+right)//2
+        if nums[mid]<target:
+            left = mid+1
+        elif nums[mid]>target:
+            right = mid
         else:
-            return 1
-    if target > nums[N//2]:
-        return N//2 + searchInsert(nums[N//2:], target)
-    else:
-        return searchInsert(nums[:N//2], target)
+            return mid
+    return left
 
 # 14.38 Count and say ============================== URL: https://leetcode.com/problems/count-and-say/
 # Problem: Let the first string be "1" and the next string will "count and say" this string, where "1" is "one 1" => 11
@@ -299,31 +300,27 @@ def searchInsert(nums, target):
 #              When there is not more characters, append the last [current] and its [count] to [combine]
 # Time Complexity: O(n^n)? outer loop O(n), and inner loop iterates through each character of previously generated string.
 #                  Relationship between n and len(str) is unknown
-def countAndSay(n):
-    if n <= 0:
-        return None
-    s = "1"
-    combine = ""
+def countAndSay(n: int) -> str:
+    res = "1"
     for _ in range(n-1):
-        current, count = s[0], 0
-        for char in s:
-            if char == current:
-                count += 1
+        cur, cnt, temp = res[0], 0, ""
+        for c in res:
+            if c == cur:
+                cnt += 1
             else:
-                combine += str(count)+current
-                current = char
-                count = 1
-        combine += str(count)+current
-        s = combine
-    return combine
+                temp += str(cnt)+cur
+                cur, cnt = c, 1
+        res = temp+str(cnt)+c
+    return res
+
 # Description: Useing intertools.groupby() which receive an iterable object, returns a group object of cluster that has same value, 
 #              and a the value that the cluster shares. ex: 11335 => [1,1] 1 / [3,3] 3 / [5] 5             
-import itertools 
+from itertools import groupby
 def countAndSay2(n):
     s = '1'
     for _ in range(n - 1):
         comb = ""
-        for digit, group in itertools.groupby(s):           # itertools.groupby(s) returns: 1) a [group] object (can convert to list) of continuous elements of same kind 
+        for digit, group in groupby(s):           # itertools.groupby(s) returns: 1) a [group] object (can convert to list) of continuous elements of same kind 
             comb += str(len(list(group)))+str(digit)        #                               2) a single value which indicates the value that the group shares
         s = comb    
     return s
