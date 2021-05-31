@@ -295,22 +295,25 @@ def searchInsert(nums: List[int], target: int) -> int:
 # 14.38 Count and say ============================== URL: https://leetcode.com/problems/count-and-say/
 # Problem: Let the first string be "1" and the next string will "count and say" this string, where "1" is "one 1" => 11
 #          and "11" is "two 1s" => 21, so on so forth. The function takes an integer [n] and output the nth string
-# Description: Start from [s] = "1" and keep tracking number of [current] character in [count]. If [current] character changes,
-#              then append the previous [count] and [current] to [combine], and switch to new [current] and set [count] to 1.
-#              When there is not more characters, append the last [current] and its [count] to [combine]
+# Description: Maintain current character [cur], the count of current character [cnt], and the current constructing 
+#              count-and-say string [temp]. [cur] initially is first char of [res], [cnt] is zero and [temp] is empty 
+#              string. Iterate through current count-and-say string [res], if the char [c] is equals to [cur], increase
+#              [cnt] by 1. If [c] is different than [cur], append [cnt] and [cur] to [temp], as consecutive [cur]s are
+#              over. Update [cur] to be new [c] and reset [cnt] to 1. After iterating each count-and-say string, always
+#              apppend [cnt] and [cur] to [temp] as the last consecutive [c]s need to be recorded. Do this loop "n-1" times
 # Time Complexity: O(n^n)? outer loop O(n), and inner loop iterates through each character of previously generated string.
 #                  Relationship between n and len(str) is unknown
 def countAndSay(n: int) -> str:
-    res = "1"
-    for _ in range(n-1):
+    res = "1"                           # [res] initially is "1"
+    for _ in range(n-1):                #Iterate n-1 times, since [res] is "1" initially and return "1" directly when n==1
         cur, cnt, temp = res[0], 0, ""
         for c in res:
-            if c == cur:
+            if c == cur:                    # current [c] is same as [cur], increase [cnt]
                 cnt += 1
-            else:
+            else:                           # [c] is different from [cur], record current [cnt] and [cur], and reset them
                 temp += str(cnt)+cur
                 cur, cnt = c, 1
-        res = temp+str(cnt)+c
+        res = temp+str(cnt)+c               # always record last [cur] and [cnt]
     return res
 
 # Description: Useing intertools.groupby() which receive an iterable object, returns a group object of cluster that has same value, 
