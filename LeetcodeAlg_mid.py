@@ -1339,3 +1339,24 @@ def grayCode(n: int) -> List[int]:
     for i in range(n):
         res += [val+2**i for val in reversed(res)]
     return res
+
+# 50.90 Subsets II ========================================================================== https://leetcode.com/problems/subsets-ii/
+# Problem: Given an integer list [nums], which may contain duplicates. Return all possible unique subsets of [nums].
+# Description: DFS. Use backtracking to construct subsets same as "subset I". Sort [nums] before passing into backtracking, backtrack 
+#              function maintains list of elements [nums] that have not been picked yet, the list of elements [temp] that are picked 
+#              to construct a subset, and the [res] list that contains all possible subsets. Each backtrack call, append current subset
+#              [temp] to [res], skip indices that nums[i-1] == nums[i]. Because taking equal value in the same DFS tree level creates 
+#              duplicates subset. And invoke next level backtrack, that current element is removed from non-picked numbers, add current
+#              element is appended to [temp]
+# Time complexityL O(2**n)
+def subsetsWithDup(nums: List[int]) -> List[List[int]]:
+    def subsetWithDup_helper(nums, temp, res):
+        res.append(temp)
+        for i in range(len(nums)):
+            if i>0 and nums[i-1]==nums[i]:
+                continue
+            else:
+                subsetWithDup_helper(nums[i+1:], temp+[nums[i]], res)
+    res = []
+    subsetWithDup_helper(sorted(nums), [], res)
+    return res
