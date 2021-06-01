@@ -331,22 +331,19 @@ def countAndSay2(n):
 # 15.53 Maximun sum of subarray ======================================= URL: https://leetcode.com/problems/maximum-subarray/
 # Problem: Given an integer array, find a contiguous subarray that sum of elements in the subarray has the maximun sum in any possible sub-arrays,
 #          Return the maximum sum
-# Description: Kadane's Algorithm, compute sum of sub-arrays that end at index i => [max_ending_here]. if [max_ending_here] < 0, then reset it to zero,
-#              because [max_ending_here]<0 can only bring down the sum, so get rid of this sub-array and start new sub-array at i+1 index.
-#              if [max_ending_here] > 0, then it can contributes to next sum, then try adding next element to it.
-#              After each iteration, keep tracking the [max_so_far]
+# Description: Kadane's Algorithm, compute sum of sub-arrays that end at index i => [temp]. if [temp] < 0, then reset it to zero,
+#              because [temp]<0 can only bring down the sum, so get rid of this sub-array and start new sub-array at i+1 index.
+#              if [temp] > 0, then it can contributes to next sum, then try adding next element to it. Compare [res] and [temp] 
+#              to track the largest sum in [res]
 # Time Complexity: O(n)
-from sys import maxsize
-def maxSubArraySum(a):
-    max_so_far = maxsize*-1
-    max_ending_here = 0
-    for i in range(len(a)): 
-        max_ending_here = max_ending_here + a[i] 
-        if (max_so_far < max_ending_here): 
-            max_so_far = max_ending_here 
-        if max_ending_here < 0: 
-            max_ending_here = 0   
-    return max_so_far
+def maxSubArray(nums: List[int]) -> int:
+    res, temp = float("-inf"), 0
+    for i in range(len(nums)):
+        temp += nums[i]
+        res = max(temp, res)        # update [res] if [temp] is larger
+        if temp<0:                  # reset [temp] if it is negative
+            temp = 0
+    return res
 
 # 16.58 Length of last word ============================== URL: https://leetcode.com/problems/length-of-last-word/
 # Problem: Given a string of words, where each word is separated by space(s). Return the length of the last word.
