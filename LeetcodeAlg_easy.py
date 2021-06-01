@@ -348,13 +348,13 @@ def maxSubArray(nums: List[int]) -> int:
 # 16.58 Length of last word ============================== URL: https://leetcode.com/problems/length-of-last-word/
 # Problem: Given a string of words, where each word is separated by space(s). Return the length of the last word.
 #          Note: It is possible that spaces is located at the beginning or end of the string
-# Description: Use str.strip() to get rid of beginning and ending spaces, then use str.split(" ") to split string into list of words.
+# Description: Use str.rstrip() to get rid of trailing spaces, then use str.split(" ") to split string into list of words.
 #              Return the len() of last element.
 # Time Complexity: O(n)
 def lengthOfLastWord(s):
     if len(s) == 0:             # corner case empty string
         return 0
-    l = s.strip().split(" ")    # get rid of prepend/append spaces, and split the string by spaces
+    l = s.rstrip().split(" ")    # get rid of prepend/append spaces, and split the string by spaces
     return len(l[-1])
 
 # 17.66 Plus one =========================================== URL: https://leetcode.com/problems/plus-one/
