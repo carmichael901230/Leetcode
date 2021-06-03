@@ -361,16 +361,21 @@ def lengthOfLastWord(s):
 # Problem: Given a list of integer, which the entire list represent a number and each element represent a digit of the number. 
 #          index 0 is the most significant digit and index -1 is least significant. Add 1 to the least significant digit and return
 #          the sum as a list with the same properties described above.
-# Description: Firstly convert the list into integer type by multiply each element by certain power of 10. Then add 1.
-#              And convert the integer back to list using list comprehension.
-def plusOne(digits):
-    num = 0
-     # Convert  list to integer
-    for i in digits:                 
-        num *= 10
-        num += i
-    num += 1        # add 1
-    return [int(x) for x in str(num)]       # list comprehension
+# Description: Maintain a [carry], and iterate through [digits] from end to beginning. If there is a [carry] then add [carry] to 
+#              the digit. If [carry] is zero, stop iteration since no need to modify the rest of the digits. At the end of loop,
+#              if [carry] is not zero, then insert "1" before modified [digits]. Otherwise, return [digits]
+# Time complexity: O(n)
+def plusOne(digits: List[int]) -> List[int]:
+    carry, digits[-1] = (digits[-1]+1)//10, (digits[-1]+1)%10               # add 1 to lowest digits
+    for i in reversed(range(len(digits)-1)):                                # iterate [digits] from end to beginning
+        if carry:                                                               # add [carry] to next digits if it is not zero
+            carry, digits[i] = (digits[i]+carry)//10, (digits[i]+carry)%10  
+        else:                                                                   # if [carry] is zero, stop loop
+            break
+    if carry:                               # highest digit produce a [carry], insert it to the beginning of [digits]
+        return [1]+digits
+    else:
+        return digits
 
 # 18.67 Add Binary =========================================== URL: https://leetcode.com/problems/add-binary/
 # Problem: Given two binary number of string type, return their sum of binary string,
