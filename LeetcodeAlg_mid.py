@@ -1360,3 +1360,28 @@ def subsetsWithDup(nums: List[int]) -> List[List[int]]:
     res = []
     subsetWithDup_helper(sorted(nums), [], res)
     return res
+
+# 51.91 Decode Ways ========================================================================== https://leetcode.com/problems/decode-ways/
+# Problem: Given a string [s], which contains integers that encoded from letter A-Z. The encoding mapping is A=1, B=2 ... Z=26. There exists
+#          some digits that the same combination of digits can be decoded to multiple alphabet letters. Such as, [s]=11106 can be mapped to
+#          1 1 10 6=>AAJF, and 11 10 6=>KJF. Note "06" cannot be mapped to "F", since "06" is different from "6".
+#          Given the string [s] and return number of possible ways to decode [s] 
+# Description: Dynamic Programming. Maintain a list [dp], where dp[i] represent the number of ways to decode substring s[:i]. 
+#              If 0 < s[i-1] <= 9,it means s[i-1] itself can be decoded to a letter from A to I, the number of ways to decode s[:i-1] should
+#              be inheritant to decode s[:i], so dp[i] += dp[i-1]. If 10<=s[i-2:i]<=26, means s[i-2] and s[i-1] can be decoded to a letter
+#              from J to Z, the number of ways to decode s[:i-2] should also be inheritant to decode s[:i], thus dp[i] += dp[i-2]. Create [dp] 
+#              with len(s)+1 element, initially all set to zero. dp[0] is the base case and dp[0]=1. dp[1] is the number of ways to decode 
+#              first letter, if s[0] is "0" and "0" cannot be decode to any letter, so dp[1] = 0 if s[0]=="0", if s[0] != "0" there is one way 
+#              to decode a single letter, thus dp[1]=1 if s[0]!="0".
+#              Itearte through [s] from index 2 to len(s)+1, dupdate dp[i] as the number of ways to decode s[:i]. Return dp[-1] at the end
+# Time complexity: O(n)
+def numDecodings(s: str) -> int:
+    dp = [0 for _ in range(len(s)+1)]           # create dp with len(s)+1 elements
+    dp[0] = 1                                       # initial base offset dp[0] 
+    dp[1] = 0 if s[0]=="0" else 1                   # initial number of ways to decode s[0]
+    for i in range(2, len(s)+1):              
+        if 0 < int(s[i-1]) <= 9:                    # s[i-1] can be decoded   
+            dp[i] += dp[i-1]
+        if 10 <= int(s[i-2:i]) <= 26:               # s[i-2] and s[i-1] combined can be decoded
+            dp[i] += dp[i-2]
+    return dp[-1]
