@@ -378,24 +378,28 @@ def plusOne(digits: List[int]) -> List[int]:
         return digits
 
 # 18.67 Add Binary =========================================== URL: https://leetcode.com/problems/add-binary/
-# Problem: Given two binary number of string type, return their sum of binary string,
+# Problem: Given two binary number of string type [a] and [b], return their sum of binary string
 #          Note: both parameters are non-empty and only contains '0' or '1'
-# Description: Convert input to integers of base 10, and add together then convert the sum to a list.
-#              Iterate from the end of list, get the sum of element and carry, mod sum by 2 and append to the end of [result] list,
-#              divide sum by 2 and quotient is carried-over to next digit place. After iteration, if still have carry then append 
-#              carry to the end of [result] list. Reverse the [result] list, convert it to string and return
+# Description: Check length of [a] and [b] prefix "0" to the shorter one. M aintain an integer [carry], 
+#              and [res] as the result string. Iterate [a] and [b] from end to beginning. For index i,
+#              convert a[i] and b[i] to integer to do additiom, [carry]=(a[i]+b[i])//2, and [res] is 
+#              appended with (a[i]+b[i])%2. Return the reversed [res] at end of loop, and prefix "1" to
+#              [res] if [carry] is not equal to zero
 # Time Complexity: O(n)
-def addBinary(a, b):
-  sumList = [int(x) for x in str(int(a) + int(b))]
-  carry = 0
-  result = []
-  while len(sumList)>0:
-    result.append((sumList[-1]+carry) % 2)
-    carry = (sumList[-1]+carry)//2
-    del sumList[-1]
-  if carry == 1:
-    result.append(1)
-  return ''.join(str(e) for e in result[::-1])
+def addBinary(a: str, b: str) -> str:
+    # prefix the shorter one with "0"
+    if len(a)>len(b):
+        b = "0"*(len(a)-len(b))+b
+    else:
+        a = "0"*(len(b)-len(a))+a
+    carry, res = 0, ""
+    for i in reversed(range(len(a))):       # iterate [a] and [b] from end to beginning
+        s = int(a[i])+int(b[i])+carry           # get the sum of a[i] and b[i] 
+        res, carry = res+str(s%2), s//2         # append sum%2 to [res], update [carry]=sum//2
+    if carry:
+        return "1"+res[::-1]
+    else:
+        return res[::-1]
 
 # 19.69 Sqrt(x) =========================================== URL: https://leetcode.com/problems/sqrtx/
 # Problem: Implement function "int sqrt(int x)", it takes an integer [x] as input and return integer part of square root of [x]
