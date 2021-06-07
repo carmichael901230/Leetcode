@@ -1385,3 +1385,36 @@ def numDecodings(s: str) -> int:
         if 10 <= int(s[i-2:i]) <= 26:               # s[i-2] and s[i-1] combined can be decoded
             dp[i] += dp[i-2]
     return dp[-1]
+
+# 52.92 Reverse Linked List II ======================================================== https://leetcode.com/problems/reverse-linked-list-ii/
+# Problem: Given the [head] of a linked list, and two integers [left] and [right], where [left]<=[right]. Reverse the node from position [left]
+#          to position [right], return the head of reversed list.
+# Description: Create a [dummy] node where "dummy.next = head". Iterate from [dummy] to find the last node before position [left], denote it 
+#              as [beg], the loop should iterate [left-1] times. 
+#              After found [beg], use algorithm of "Reverse Linked List". Maintain three pointers [prev], [cur], and [next], where initally [prev]  
+#              is None, [cur] points the node at position [left]. Iterate a loop [right-left+1] times, in which [next] is assigned with [cur.next]
+#              [cur.next] points to [prev], and shift both [prev] and [cur] to next position.
+#              Connect the revsered linked list with the reset of the node. At the end of loop, [prev] should points to the node at position [right] 
+#              [cur] should points to the node right after [prev]. Thus, [beg.next.next] which is the last node of reversed list, should points to
+#              [cur], which is the first node after reversed part. And [beg.next] should points to [prev] the connect to the first node of reversed
+#              list.
+# Time complexity: O(n)
+def reverseBetween(head: ListNode, left: int, right: int) -> ListNode: 
+    if left==right:                     # corner case, no need to reverse if left==right
+        return head
+    dummy = ListNode(0, head)
+    beg = dummy
+    for _ in range(left-1):             # find the node before position [left]
+        beg = beg.next
+    # algorithm of Reverse Linked List
+    prev = None
+    cur = beg.next
+    for _ in range(right-left+1):       # reverse list
+        next = cur.next
+        cur.next = prev
+        prev = cur
+        cur = next  
+    beg.next.next = cur                 # connect tail of reversed list to the node comes after 
+    beg.next = prev                     # connect head of reversed list to the node comes before
+    return dummy.next
+    

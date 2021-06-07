@@ -405,24 +405,20 @@ def addBinary(a: str, b: str) -> str:
 # Problem: Implement function "int sqrt(int x)", it takes an integer [x] as input and return integer part of square root of [x]
 # Description: Newton's method of square root approximation. 
 #              The equation to find the square root of [num] is x^2 = num, it can written as x^2 - num = 0, which is a polynomial equation.
-#              Starting from i = num, keep finding the tangent line at x=i, and find the intersection of tangent line and x-axis, make the 
-#              x value of intersection the next i. General equation of tangent line is y = f'(x)(x-i)+f(i). Make y=0 to find the intersection
-#              with x-axis, then we have 0 = f'(i)(x-i)+f(i), where [i] is previous intersection with x-axis and solving [x] next intersection. 
-#              Essentially, divide both sides of the tangent line equation by f'(x), we got x = i -f(i)/f'(i). So, if the previous intersection is
-#              known, we can always find next intersection. As the x value getting closer to answer of sqrt(num), the difference between two [x]s
-#              becomes smaller. And when the difference is less than certain amount of error, the answer is approximated.
-from sys import maxsize
-def mySqrt(num):
-    if (num < 0):
-        raise ValueError("Sqrt of negative number")
-    if (num == 0):            # corner case: 
+#              Starting from guess = num, keep finding the tangent line at x=[guess], and find the intersection of tangent line and x-axis, 
+#              make the x value of intersection to be the next [guess]. Use equation y=kx+b with k=2x and (x,y)=(i, i^2-num) to find the 
+#              equation of tangent line, which should be "y=2*(guess)*x-(guess)^2-num". Make y=0 to equaltion that "y=2*(guess)*x-(guess)^2-num" 
+#              and find the intersection, x=guess^2+num)/(2*guess). The x value is [newGuess], check the difference between [guess] and [newGuess]
+#              If they are very close(diff<0.01), stop the loop and return [guess]
+def mySqrt(x: int) -> int:
+    if x == 0:                                  # corner case x=0 will lead to divid by zero
         return 0
-    guess, diff = num, maxsize
-    while diff > 0.01:                      # set allowed error 
-        newGuess = guess - (guess**2-num)/(2*guess)     # Apply the x = i - f(i)/f'(i) equation
-        diff = abs(newGuess - guess)                    # Check difference between two [x]s
+    guess, diff = x, float('inf')               # [guess] starts fromg [num]
+    while diff > 0.01:                              # stop the loop if different between [guess] and [newGuess] is small enough
+        newGuess = (guess*guess+x)/(2*guess)        # Use tangent line to find [newGuess]
+        diff = abs(newGuess - guess)
         guess = newGuess
-    return int(newGuess)
+    return int(guess)
 
 # 20.70 Climbing stairs ============================================= URL: https://leetcode.com/problems/climbing-stairs/
 # Problem: Climb stairs with n step, each climb can be 1 step or 2 steps, output how many ways that you can climb to the top
