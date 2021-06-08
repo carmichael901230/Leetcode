@@ -425,14 +425,13 @@ def mySqrt(x: int) -> int:
 # Description: Fibonacci Approach. In order to climb n steps, there are two general ways: 1) climb n-2 steps and climb 2 steps at once.
 #              or 2) climb n-1 step and climb one more step. Then the total ways to climb n steps is [n-2]+[n-1], same as fibonacci number
 # Time Complexity: O(n)
-def climbStairs(n):
-    if n<0: return 1        
-    elif n==1: return 1     # base case n=1
-    elif n==2: return 2     # base case n=2
-    n_1, n_2 = 2, 1
-    for _ in range(n-2):            # do n-2 times, since start from n = 3
-        n_2, n_1 = n_1, n_2+n_1     # fibonacci calculation
-    return n_1
+def climbStairs(n: int) -> int:
+    dp1, dp2, dp = 0, 1, 1
+    for _ in range(1,n+1):
+        dp = dp1 + dp2                  # climb 2 steps from n-2 or climb 1 step from n-1 to reach step n
+        dp1, dp2 = dp2, dp              # update value for step n-2 and n-1
+    return dp
+    
 # Description: Recursive Memory Approach. Initall a list to memorize number of way in case i where i<n, recursively calculate M[n]
 #              if M[i] is not stored in list then calculate M[n] = M[n-2]+M[n-1], if M[i] is stored in list then directly return M[i]
 def climbStairs2(n):

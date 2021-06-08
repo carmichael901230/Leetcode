@@ -3,6 +3,12 @@ class ListNode:
     def __init__(self, val=0, next=None) -> None:
         self.val = val
         self.next = next
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+
 # 1.2 Add Two Numbers ============================================================ https://leetcode.com/problems/add-two-numbers/
 # Problem: Given two non-empty linked list [l1], [l2]. Two linked lists represent two non-negative integers, where each digit is 
 #          stored as node in reverse order. Sum up both linked list and return the sum as a linked list.
@@ -1418,3 +1424,51 @@ def reverseBetween(head: ListNode, left: int, right: int) -> ListNode:
     beg.next = prev                     # connect head of reversed list to the node comes before
     return dummy.next
     
+# 53.93 Restore IP Addresses ================================================================== https://leetcode.com/problems/restore-ip-addresses/
+# Problem: Given an integer string [s] containing only digits, return all possible valid IP address constructed from [s].
+#          A valid IP consists of four parts separated by period ".", and each part is a integer number between 0 and 255. Each part can't have 
+#          leading zero, but zero by itself is OK.
+#          Ex: 1022310119 => 10.223.101.19 is a valid IP address
+#                         => 102.231.0.11 is a valid IP address, since zero by itself is OK
+#                         => 1.023.101.19 is invalidm "023" has leading zero
+# Descritpion: DFS backtracking. Maintain [pool] as substring not taken, [temp] list track the valid IP sub-domains taken from [pool], [res] a set
+#              that contains constructed valid IP addresses. For each recursive call, If [temp] contains four elements and no more char left in 
+#              [pool], means a valid IP address is created, add [temp] to [res] in IP format. If len(temp)>4, number of domain is excessed, return
+#              to stop this traversal. The recursive case, use for loop iterate [i] from 1 to 3, and validate pool[:i] to be inserted into [temp],
+#              if pool[:i] is empty or excess 255, or pool[:i] contains multiple chars with leading zero, return this traversal because it is not 
+#              possbile to get a valid domain for this recursive level.
+#              Invoke new recursive call with pool[i:] to eliminate taken substring. temp+[take] that [take] is the valid domain pool[:i], and add
+#              it to current constructed IP address, also pass [res] to next level
+def restoreIpAddresses(s: str) -> List[str]:
+    res = set()
+    restoreIpAddresses_helper(s, [], res)
+    return [el for el in res]
+
+def restoreIpAddresses_helper(pool, temp, res):
+    if len(temp)==4 and len(pool)==0:                           # valid IP address is created, [temp] has four domains and no char left in [pool]
+        res.add(".".join(temp))                                     # add valid IP to [res]
+        return
+    if len(temp)>4:                                             # number of domains is exceeded
+        return
+    for i in range(1,4):                                        # take first three char from [pool] and valid them
+        take = pool[:i]
+        if not take or int(take)>255:                               # [take] is empty or exceeded 255
+            return
+        if i!=1 and take[0] == "0":                                 # [take] contains leading zero
+            return
+        restoreIpAddresses_helper(pool[i:], temp+[take], res)
+
+def generateTrees(n: int) -> List[TreeNode]:
+    def helper(start, end):
+        if start==end:
+            return None
+        res = []
+        for i in range(start, end):
+            for l in helper(start, i) or [None]:
+                for r in helper(i+1, end) or [None]:
+                    node = TreeNode(i, l, r)
+                    res.append(node)
+        return res
+    return helper(1, n+1)
+
+print(generateTrees(3))
