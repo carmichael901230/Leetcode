@@ -1458,17 +1458,26 @@ def restoreIpAddresses_helper(pool, temp, res):
             return
         restoreIpAddresses_helper(pool[i:], temp+[take], res)
 
+# 54.95 Unique Binary Search Trees II ================================================ https://leetcode.com/problems/unique-binary-search-trees-ii/
+# Problem: Given an integer n, return all the structurally unique binary search tree, which contains nodes from 1 to n. Return the answer in any
+#          order
+# Description: DFS backtracking. Create a recursive helper function, that take [start] and [end] as the node value should be created within it.
+#              Iterate [i] from [start] to [end], where [i] is the root of tree that contains node between [start] to [end]. According to BST
+#              property, left subtree of [i] contains nodes from [start] to [i-1], and right subtree contains nodes from [i+1] to [end]. Thus,
+#              recursively call helper function on (start, i-1) and (i+1, end). Both recursive call will return a list of nodes which are 
+#              all valid BS subtrees created. Connect all nodes returned from (start, i-1) as the left node of [i], and connect all nodes returned
+#              from (i+1, end) as the right node of [i]. Append node [i] to a list [res], which is returned and to be used by upper level.
+# Time complexity: TODO see Catalan Number
 def generateTrees(n: int) -> List[TreeNode]:
-    def helper(start, end):
-        if start==end:
-            return None
-        res = []
-        for i in range(start, end):
-            for l in helper(start, i) or [None]:
-                for r in helper(i+1, end) or [None]:
-                    node = TreeNode(i, l, r)
-                    res.append(node)
-        return res
-    return helper(1, n+1)
+    return generateTrees_helper(1, n+1)
 
-print(generateTrees(3))
+def generateTrees_helper(start, end):
+    if start==end:
+        return None
+    res = []
+    for i in range(start, end):                                     # take [i] as root of this level
+        for l in generateTrees_helper(start, i) or [None]:              # (start, i) are left subtree of [i]
+            for r in generateTrees_helper(i+1, end) or [None]:          # (i+1, end) are right subtree of [i]
+                node = TreeNode(i, l, r)                            # create node [i] and connect all possible left/right child to it
+                res.append(node)                                
+    return res                                                  # store [i] in [res] and return [res] to be used by upper level
