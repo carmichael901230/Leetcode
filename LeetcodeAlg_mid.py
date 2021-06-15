@@ -1481,3 +1481,22 @@ def generateTrees_helper(start, end):
                 node = TreeNode(i, l, r)                            # create node [i] and connect all possible left/right child to it
                 res.append(node)                                
     return res                                                  # store [i] in [res] and return [res] to be used by upper level
+
+# 55.96 Unique Binary Search Trees ==================================================== https://leetcode.com/problems/unique-binary-search-trees/
+# Problem: Givne an integer [n], return the number of structually unique binary search trees which contains exactly nodes from 1 to [n].
+# Description: Dynamic Programming. Consider the number of structually unique BST of [n] nodes is denoted as G(n). If we pick 1 as the root node,
+#              no node in left subtree, and n-1 nodes in right subtree. It produces two sub-problems aka G(0) and G(n-1). If we pick 2 as the
+#              root node, 1 node in left subtree G(1) and n-2 nodes in right subtree G(n-2). So on so forth, If we pick n-1 as the root node, there
+#              are n-2 nodes in left subtree G(n-2), and 1 node in right subtee G(1). If we pick n as the root node, there aren-1 nodes in left 
+#              subtree G(n-1) and 0 node in right subtree G(0). And the number of possiblilty is the cross-product of left and right subtree, thus
+#              G(i-1)*G(n-i) the production of left and right is the number of BSTs when pick [i] at the root. Thus it has
+#              G(n) = G(0)*G(n-1) + G(1)*G(n-2) + ... + G(n-2)*G(1) + G(n-1)*G(0). Use DP to record from G(0) to G(n), and return G(n) at the end
+# Time complexity: O(n^2) build [dp] of size n, each dp[i] need to iterate i times
+def numTrees(n: int) -> int:
+    dp = [0 for _ in range(n+1)]
+    dp[0], dp[1] = 1, 1                 # G(0) and G(1) both equals to 1, since zero node and 1 node both have one unique structual
+    for i in range(2, n+1):                 # iterate [i] to build [dp]
+        for j in range(i):                      # [j] represents pick [j] at root
+            dp[i] += dp[j]*dp[i-j-1]
+    return dp[n]
+    
