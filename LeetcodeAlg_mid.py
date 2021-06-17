@@ -1500,3 +1500,31 @@ def numTrees(n: int) -> int:
             dp[i] += dp[j]*dp[i-j-1]
     return dp[n]
     
+# 56.97 Interleaving String =============================================================== https://leetcode.com/problems/interleaving-string/
+# Problem: Given three strings [s1], [s2], [s3], check if [s3] is formed by an interleaving of [s1] and [s2].
+#          And interleaving of two string [s] and [t] is a string that consists of character from [s] and [t], where the sequence of characters
+#          of [s] and [t] doesn't change
+#          Ex: s1 = [abcdef], s2 = {ghijk}, one of the interleaving s3 = {gh}[a]{i}[bcd]{j}[e]{k}[f]
+#          where if we remove character of s2 then s3 becomes s1, and if we remove character of s1 then s3 become s2
+# Description: Dynamic Programming. Create a 2d boolean list, with len(s1)+1 rows and len(s2)+1 columns. A cell dp[i][j] represents if substring
+#              s3[:i+j] is an interleaving that formed from characters of s1[:i] and s2[:j]. To determine value of dp[i][j], it can be formed in
+#              two ways. 1) from dp[i-1][j] and pick s1[i-1] as next character, if dp[i-1][j] is True and s1[i-1]==s[i+j-1], meaning dp[i-1][j] 
+#              formed an interleaving, and adding s1[i-1] also form an interleaving, then dp[i][j] is True. 2) from dp[i][j-1] and pick s2[j-1] 
+#              as next character, if dp[i][j-1] is True and s2[j-1]==s3[i+j-1], then dp[i][j] is Ture. Follow the manner and fullfill every cell
+#              in dp, and return dp[-1][-1] as result
+# Time complexity: O(m*n), n, m = len(s1), len(s2)
+def isInterleave(s1: str, s2: str, s3: str) -> bool:
+    r, c, l = len(s1), len(s2), len(s3)
+    if r+c!=l:                  # early termination if the size of s1, s2, and s3 doesn't match
+        return False
+    dp = [[False for _ in range(c+1)] for _ in range(r+1)]      # create [dp]. has len(s1)+1 rows and len(s2)+1 columns
+    dp[0][0] = True                                             # when there is not character picked, [0][0] is always true
+    for i in range(1, r+1):                                         # the first row represent only pick characters from s2 to form interleaving
+        dp[i][0] = dp[i-1][0] and s1[i-1]==s3[i-1]
+    for j in range(1, c+1):                                         # the first column represent only pick character from s1 to form interleaving
+        dp[0][j] = dp[0][j-1] and s2[j-1]==s3[j-1]
+    for i in range(1, r+1):
+        for j in range(1, c+1):                                         # iterate thorugh cells in [dp]
+            dp[i][j] = (dp[i-1][j] and s1[i-1]==s3[i+j-1]) or (dp[i][j-1] and s2[j-1]==s3[i+j-1])  # fill [i][j] from either [i-1][j] or [i][j-1]
+    return dp[-1][-1]               # last element of [dp] holds result
+                
