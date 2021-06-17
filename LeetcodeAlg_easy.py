@@ -493,6 +493,8 @@ def merge(nums1, m, nums2, n):
 # Space Complexity: O(log(bound))
 import math
 def powerfulIntegers(x, y, bound):
+    if bound<=0:                            # corner case, log(0) of any base is undefined
+        return []
     res = set()
     i_bound = math.ceil(math.log(bound, x)) if x!=1 else 1      # if x or y == 1, make their bound == 1
     j_bound = math.ceil(math.log(bound, y)) if y!=1 else 1      # because there is only one possible value of 1**n == 1
@@ -502,6 +504,38 @@ def powerfulIntegers(x, y, bound):
             if sum<=bound:
                 res.add(sum)
     return list(res)
+
+# Description: Dynamic Programming. Find maximum value of i and j, denote as [i_bound] and [j_bound] where "i_bound = math.log(bound,x)"
+#              and "j_bound = math.log(bound,y)". Maintain a list [dp] of "j_bound+1" element, each element is a tuple of two elements
+#              which represents (x**i, y**j). The first element of [dp] is intially (x**0, y**0) = (1,1). Iterate through [dp], that
+#              dp[j] = (dp[j-1][0], dp[j-1][1]*y). The next element is equal to previous element multiply [y] onto second tuple element 
+#              dp[j-1][1]*y. Meanwhile, get the [sum] of dp[j][0] and dp[j][1]  if [sum] less than or equal to [bound], add [sum] to 
+#              a set [res], which tracking results. 
+#              After building the first [dp] where [i]=0, iterate [i] from 1 to [i_bound] to multiply [x], 
+#              then dp[j] = (dp[j][0]*x, dp[j][1]). Meanwhile if [sum] of dp[j][0] and dp[j][1] is less than or equal to  bound, add 
+#              [sum] to [res]. At the end, convet [res] to list and return
+import math
+def powerfulIntegers(x: int, y: int, bound: int) -> List[int]:
+    if bound<2:
+        return []
+    res = set()
+    i_bound = math.ceil(math.log(bound, x))+1 if x!=1 else 1        # find boundary of i and j
+    j_bound = math.ceil(math.log(bound, y))+1 if y!=1 else 1
+    dp = [(1,1) for _ in range(j_bound)]                            # create [dp] list
+    if 2<=bound:
+        res.add(2)
+    for j in range(1, j_bound):                         # construct first row of [dp]
+        dp[j] = (dp[j-1][0], dp[j-1][1]*y)
+        s = dp[j][0]+dp[j][1]
+        if s<=bound:
+            res.add(s)
+    for i in range(1, i_bound):                         # construct next row of [dp] from previous row
+        for j in range(j_bound):
+            dp[j] = (dp[j][0]*x, dp[j][1])
+            s = dp[j][0]+dp[j][1]
+            if s <= bound:
+                res.add(s)
+    return [el for el in res]
 
 # 24.100 Same tree ======================================================================= URL: https://leetcode.com/problems/same-tree/
 # Problem: Given roots of two binary trees(each node can has up to two children). Compare two trees, if trees have same structure and 
