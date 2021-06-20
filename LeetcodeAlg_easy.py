@@ -5,6 +5,12 @@ class ListNode:
         self.next = next
         self.val = val
 
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+
 # 1.1 Two sum ========================================= URL: https://leetcode.com/problems/two-sum/
 # Problem: Given an numeric array, find two number in the array that sum up to a given number
 #          Return indices of these two numbers

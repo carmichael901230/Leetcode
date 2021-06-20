@@ -1527,4 +1527,26 @@ def isInterleave(s1: str, s2: str, s3: str) -> bool:
         for j in range(1, c+1):                                         # iterate thorugh cells in [dp]
             dp[i][j] = (dp[i-1][j] and s1[i-1]==s3[i+j-1]) or (dp[i][j-1] and s2[j-1]==s3[i+j-1])  # fill [i][j] from either [i-1][j] or [i][j-1]
     return dp[-1][-1]               # last element of [dp] holds result
+
+# 57.98 Validate Binary Search Tree =================================================== https://leetcode.com/problems/validate-binary-search-tree/
+# Problem: Given the [root] of a binary search tree, determine if the tree is valid. A valid BST has following proerties:
+#          1. left subtree of a [node] contains nodes that smaller than [node.val]
+#          2. right subtree of a [node] contains nodes that larger than [node.val]
+#          3. both left and right subtrees also satisfy there two rules
+# Description: DFS. Maintain helper function which track the [floor] and [ceiling] of current [node.val]. For a [node], the node in its left subtree
+#              can have a value that is less than [node.val] meaning ceiling = node.val, and the node in its right subtree can have value that is 
+#              greater than [node.val] meaning floor = node.val. [floor] and [ceiling] are intially "float(-inf)" and "float('inf)" and passed down to 
+#              each tree level
+def isValidBST(root: TreeNode) -> bool: 
+    return isValidBST_helper(root, float('-inf'), float('inf'))         # traverse from root of tree, give initial value of floor and ceiling
+
+def isValidBST_helper(root, floor, ceiling):
+    if not root:                                # no node left, this path is valid
+        return True
+    if root <= floor or root >= ceiling:        # current val is invalid
+        return False
+    # traverse to left child, use root.val as ceiling
+    # traverse to right child, use root.val as floor
+    # return True when both subtrees are valid
+    return isValidBST_helper(root.left, floor, root.val) and isValidBST_helper(root.right, root.val, ceiling)
                 
