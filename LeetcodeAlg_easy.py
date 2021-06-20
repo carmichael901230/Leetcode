@@ -586,18 +586,21 @@ def isSymmetric_recursive(left, right):
 # Problem: You are a robber planning to rob along a street, the amount of money you can rob from each house along this street is
 #          given in a list with non-negative integers. The alarm will ring if you robbed adjacent houses, return the maximun amount
 #          of money you can rob without triggerring the alarm.
-# Description: Dynamic programming, avoid robbing adjacent houses. Keep tracking the cumulative maximun money robbed 
-#              from first i houses in list M[i]. Then for each house [i], M[i] = max(M[i-2]+nums[i], M[i-1]). Either rob house [i] where
-#              M[i] = M[i-2]+nums[i] or don't rob house [i] where M[i]=M[i-1]
-# Time Complexity: O(n), iterate every house i and get optimized gain after robbing up to house i.
-def rob(nums):
-    if len(nums) == 0: return 0             # empty input
-    if len(nums) <= 2: return max(nums)     # input less than 3 elements
-    M = [-1] * (len(nums)+1)                # memory list tracking max after robbing [i]the house
-    M[0], M[1] = 0, nums[0]
-    for i in range(2, len(nums)+1):
-        M[i] = max(M[i-2]+nums[i-1], M[i-1])    
-    return M[-1]                            # iterate through list, max is M[-1]
+# Description: Dynamic programming, avoid robbing adjacent houses. Maintain [dp1], [dp2], and [dp], where [dp] is the maximum money robbed
+#              at current index [i], [dp2] is the maximum money at previous index [i-1], and [dp1] is the maximum money at index [i-2]. 
+#              Initially, [dp1] = nums[0], [dp2] = max(nums[0], nums[1]) because we can only choose from nums[0] and nums[1] at index 1,
+#              so the larger one is picked, and [dp] don't have initial value. 
+#              For index [i], [dp] = max(dp1+nums[i], dp2). We can rob current index and money add to [dp1] or we don't rob index [i], 
+#              then the money robbed is equal to [dp2].
+# Time Complexity: O(n)
+def rob(nums: List[int]) -> int:
+    if len(nums)<=2:                # if [nums] has less than 2 numbers, take the larger one
+        return max(nums)
+    dp1, dp2, dp = nums[0], max(nums[0],nums[1]), 0     # intial value of [dp1] [dp2]
+    for i in range(2, len(nums)):       
+        dp = max(dp1+nums[i], dp2)              # either rob current [i] + dp1, or don't rob [i], which is dp2
+        dp1, dp2 = dp2, dp
+    return dp
 
 # 27.205 Isomorphic string ================================================= URL: https://leetcode.com/problems/isomorphic-strings/
 # Problem: Given two strings check if they are isomorphic to each other. Two strings are Isomorphic, when characters one string can
