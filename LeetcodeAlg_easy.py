@@ -547,24 +547,16 @@ def powerfulIntegers(x: int, y: int, bound: int) -> List[int]:
 # Problem: Given roots of two binary trees(each node can has up to two children). Compare two trees, if trees have same structure and 
 #          same values in corresponding positions. Return True if two trees are identical, False otherwise
 # Description: Recursively iterate both trees at same path. If cur nodes have same value, then keep compare left and right children.
-#              If both hit None(end of branch) return True, if exactly one of them hit None, meaning not the same structure return False. 
+#              If both hit None(end of path) return True, if exactly one of them hit None, meaning not the same structure return False. 
 #              If cur nodes have different value, return False.
 # Time complexity: O(n)
-# TreeNode Class
-class TreeNode:
-    def __init__(self, x):
-        self.val = x
-        self.left = None
-        self.right = None
-    @staticmethod
-    def isSameTree(p, q):
-        if p is None and q is None:
-            return True
-        if p is None or q is None:
-            return False
-        if p.val != q.val:
-            return False
-        return TreeNode.isSameTree(p.left,q.left) and TreeNode.isSameTree(p.right,q.right)
+def isSameTree(p: TreeNode, q: TreeNode) -> bool:
+    if p and q:
+        if p.val == q.val:          # current nodes are equal, continue comparing left and right children
+            return isSameTree(p.left, q.left) and isSameTree(p.right, q.right)
+    if not p and not q:             # both path hit end, return True
+        return True
+    return False            # doesn't fall into previous conditions, means an unmatch is found
 
 # 25.101 Symmetric tree ============================================================= URL: https://leetcode.com/problems/symmetric-tree/
 # Problem: Given a root of binary of TreeNode class, check if the tree is symmetric by a vertical line through middle, meaning
