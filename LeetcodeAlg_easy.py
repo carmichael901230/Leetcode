@@ -605,19 +605,19 @@ def rob(nums: List[int]) -> int:
 # 27.205 Isomorphic string ================================================= URL: https://leetcode.com/problems/isomorphic-strings/
 # Problem: Given two strings check if they are isomorphic to each other. Two strings are Isomorphic, when characters one string can
 #          be mapped one to one to characters in another string. ex: 'paper', 'title'  {p:t, a:i, e:l, r:e}
-# Description: Using hash map. Putting two strings into dictionary, where chars in [s] are keys and chars in [t] are values, and mapping relation is 
-#              represented by key-value relation. If value of a key is modified, meaning char in [s] mapped to multiple chars in [t].
-#              If a value exists in dict.values() and its key is different from s[i], meaning char in [t] mapped from multiple chars in [s]
-# Time Complexity: O(n^2), for loop takes O(n) and check existence of t[i] in dict.vales() both take O(n)
-def isIsomorphic(s, t):
-    if len(s) != len(t): return False
-    dict = {}
+# Description: Using hash map. Maintain two disctionary [s2t] and [t2s], where [s2t] use character of [s] as "key" and character of
+#              [t] as "value". [t2s] is opposite, use character of [t] as "key", and character of [s] as "value". Iterate through 
+#              [s] and [t] at same time and populate [s2t] and [t2s]. Also compare the mapping between [s2t] and [t2s], return false 
+#              if any dismatch. And return True at the end of loop 
+def isIsomorphic(s: str, t: str) -> bool:
+    s2t, t2s = {}, {}
     for i in range(len(s)):
-        if s[i] in dict.keys():
-            if dict[s[i]] != t[i]: return False
-        else:
-            if t[i] in dict.values(): return False
-            dict[s[i]] = t[i]
+        if s[i] in s2t and s2t[s[i]] != t[i]:       # s[i] exists in [s2t] but dismatch with t[i]
+            return False
+        if t[i] in t2s and t2s[t[i]] != s[i]:       # t[i] exists in [t2s] but dismatch with s[i]
+            return False
+        s2t[s[i]] = t[i]                # update [s2t] and [t2s] with current s[i] and t[i]
+        t2s[t[i]] = s[i]
     return True
 # Description: Using zip() & set(). Compare size of set(zip(s,t)), set(s) and set(t). If [s] has a char maps to multiple chars in [t],
 #              then set(s) has smaller size. If [t] has a char maps from multiple chars in [s], then set(t) has smaller size. And each char
