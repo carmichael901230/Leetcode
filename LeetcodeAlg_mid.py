@@ -1550,3 +1550,30 @@ def isValidBST_helper(root, floor, ceiling):
     # return True when both subtrees are valid
     return isValidBST_helper(root.left, floor, root.val) and isValidBST_helper(root.right, root.val, ceiling)
                 
+# 58.99 Recover Binary Search Tree =================================================== https://leetcode.com/problems/recover-binary-search-tree/
+# Problem: Given the [root] of BST, there are exactly two nodes were swapped and out of place. Swap these two node back to place
+# Description: Inorder traversal with stack. If traverse BST inorder, the node values are traversed in ascending order. If node are swapped. then
+#              there will have node value than [prev.val] > [cur.val]. And there are two cases: 
+#               1) swapped nodes are adjacent, the nodes sequence looks like following when traverse inorder, "... nodes < A > B < nodes ...". Node 
+#                   "A" and "B" are out of place, need to swap them.
+#               2) swapped nodes are not adjacent, the sequence looks like, "... nodes < A > X <  ... < Y > B < nodes ... ". There are two value
+#                   decreasings, and "A" and "B" are the nodes that out of place, need to swap them. 
+#              In both case, we want to swap "A" and "B", thus maintain a list of tuples [wrong] to record nodes that out of place. 
+#              If swapped nodes are adjacent, then [wrong] contain single tupple (A, B), swap wrong[0][0].val and wrong[0][1].val
+#              If swapped nodes are not adjacent, then [wrong] contains two tupples (A, X) and (Y, B), swap wrong[0][0].val and wrong[1][1].val 
+#              Swap in both case can be simplified as swapping wrong[0][0].val and wrong[-1][1].val
+# Time complexity: O(N)
+# Space complexity: O(logN)
+def recoverTree(root: TreeNode) -> None:
+    cur, prev = root, TreeNode(float('-inf'))               # [prev] as previous node of [cur], that [prev.val] < [cur.val]
+    stack, wrong = [], []
+    while cur or stack:                                      # inorder traversal with [stack]
+        if cur:
+            stack.append(cur)
+            cur = cur.left
+        elif stack:
+            cur = stack.pop()
+            if cur.val<prev.val:                            # detect swapped nodes
+                wrong.append((prev, cur))
+            prev, cur = cur, cur.right
+    wrong[0][0].val, wrong[-1][1].val = wrong[-1][1].val, wrong[0][0].val   # swap nodes back to place
