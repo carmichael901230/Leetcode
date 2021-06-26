@@ -635,37 +635,35 @@ def maxDepth(root):
     if not root: return 0                        # base case: end of branch return 0
     return 1+max(maxDepth(root.left), maxDepth(root.right))  # keep compare the maximum depth of children and add 1 as the depth of current node bottom-up
 
-# 29.107 Binary tree level order traversal II ========================================= URL: https://leetcode.com/problems/binary-tree-level-order-traversal-ii/
+# 29.107 Binary tree level order traversal II =================================== URL: https://leetcode.com/problems/binary-tree-level-order-traversal-ii/
 # Problem: Bottom-up level order traversal, given a root of a binary tree, return a 2D list where nodes of same level are wrapped in same sub-list,
 #          and highest level is at the beginning of the list, root is at the end of the list.
-# Description: Use deque to build a top-down traversal list, and reverse it. Starting from root keep pop first node from deque and
-#              adding its children nodes into deque, until deque is empty. Elements in deque follow the structure of [node, level], the size of result list
-#              is same as number of levels in the tree. So, if adding new node of same level as previous node, len(result) = level+1.
-#              If addint new node of a new level, len(result) = level and a new sub-list need to be created. 
-#              ex: root = 1, root.left =  2, root.right = 3. 
-#              1) queue:   [[1,0]]  level==0, len(result) ==0            2) queue:[[2,1],[3,1]]  level==1, len(result)==1
-#                 result:  []       create a new sub-list                   result: [[1]]        create a new sub-list
-#              3) queue:[[3,1]]       level==1, len(result) ==2
-#                 result: [[1],[2]]   no need to create new su-list, still append node to previous sub-list
+# Description: DFS with [level] count. Use a helper function, which tracks [level] as the "depth" of current node. Maintain [res] as 2D result list, where
+#              "i"th element contains nodes at "i"th depth. Return reversed [res] at the end as "bottom-up" level order traversal.
+#              Initally, helper function takes [root] as starting node, [level] = 0, and [res] is an empty list
+#              In helper function. if len(res)<=level, means a new level is hit and need to create a new sub-list in [res] to hold nodes of new level.
+#              Add current [node] to its corresponding level res[level].append(node.val). Then invoke helper function on [node.left] and [node.right]
+#              with [level+1]. If current [node] is None, then stop current path by returning
 # Time Complexity: O(n)
-from collections import deque
-def levelOrderBottom(root):
-    queue, res = deque([(root, 0)]), []         # elements in deque are in structure of [node, level]
-    while queue:
-        node, level = queue.popleft()           # FIFO deque
-        if node:
-            if level == len(res):               # moving onto a new level, create a new sub-list
-                res.append([])
-            res[level].append(node.val)         # append a node to its level-list
-            queue.append((node.left, level + 1))
-            queue.append((node.right, level + 1))
-    return res[::-1]                            # reverse result to be bottom-up
+def levelOrderBottom(root: TreeNode) -> List[List[int]]:
+    res = []
+    levelOrderBottom_helper(root, 0, res)
+    return res[::-1]
 
-# 30.108 Convert sorted array to binary search tree =========================================== URL: https://leetcode.com/problems/convert-sorted-array-to-binary-search-tree/
+def levelOrderBottom_helper(root, level, res):
+    if not root:                # hit None, end current path
+        return
+    if len(res)<=level:             # a new level is hit, add new sub-list to hold nodes from new level
+        res.append([])
+    res[level].append(root.val)         # add current node to corresponding level
+    levelOrderBottom_helper(root.left, level+1, res)            # invoke function on child nodes
+    levelOrderBottom_helper(root.right, level+1, res)
+
+# 30.108 Convert sorted array to binary search tree ====================== URL: https://leetcode.com/problems/convert-sorted-array-to-binary-search-tree/
 # Problem: Given a sorted list of integers, convert it to a height-balanced binary search tree, where the depths of leaves can differ by at most 1,
 #          left child < parent < right child. Return the root of the result tree.
-# Description: Grab the middle element of list as the root, and divide the list from middle into two sub-lists. Recursively finding the middle, and the middle of 
-#              left sub-list become left child and right the middle of right sub-list is the right child.
+# Description: Grab the middle element of list as the root, and divide the list from middle into two sub-lists. Recursively finding the middle, and the
+#              middle of left sub-list become left child and right the middle of right sub-list is the right child.
 # Time Complexity: O(n)
 def sortedArrayToBST(nums):
     if not nums:
