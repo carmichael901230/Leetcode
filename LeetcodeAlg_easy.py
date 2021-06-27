@@ -665,7 +665,7 @@ def levelOrderBottom_helper(root, level, res):
 # Description: Grab the middle element of list as the root, and divide the list from middle into two sub-lists. Recursively finding the middle, and the
 #              middle of left sub-list become left child and right the middle of right sub-list is the right child.
 # Time Complexity: O(n)
-def sortedArrayToBST(nums):
+def sortedArrayToBST(nums: List[int]) -> TreeNode:
     if not nums:
         return None             # No more number left in sub-list, return None to indicate end of sub-tree
     mid = (len(nums)-1) // 2        # find middle number
@@ -719,13 +719,13 @@ def recur(nums, temp, result):
 #              recursion is -1. If any return value is -1, means there exists unbalanced branch and should return -1 immediately.
 # Time complexity: O(n) 
 def isBalanced(root):
-    return isBal_recur(root) != -1          # if balanced, recur return depth, if not balanced, recur return -1
+    return isBalanced_helper(root) != -1          # if balanced, recur return depth, if not balanced, recur return -1
 
-def isBal_recur(root):
+def isBalanced_helper(root):
     if not root:
         return 0
-    left = isBal_recur(root.left)           # get return value of previous recursion
-    right = isBal_recur(root.right)         # get return value of previous recursion
+    left = isBalanced_helper(root.left)           # get return value of previous recursion
+    right = isBalanced_helper(root.right)         # get return value of previous recursion
     # check previous value, if any -1 means already exists unbalanced, also check if any unbalanced in this level
     if left == -1 or right == -1 or abs(left-right) > 1:        
         return -1
