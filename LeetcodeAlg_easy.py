@@ -733,10 +733,11 @@ def isBalanced_helper(root):
 
 # 34.111 Minimum depth of binary tree ============================================== URL: https://leetcode.com/problems/minimum-depth-of-binary-tree/
 # Problem: Given the root of binary tree, find depth of leaf that is closest to root. Return the depth.
-# Description: If a node have both left and right children, recursively call function on both children and take [min(left, right)+1] as the depth of parent node.
-#              If a node have one child or no child, recursively call function on both children and take [max(left, right)+1] as the depth, since if a child is missing
-#              the recursive call will return 0, and the other child (if not none) will contributes to the depth of parent node.
-def minDepth(root):
+# Description: DFS. If a node have both left and right children, recursively call function on both children and take min(left, right)+1 as the depth
+#              If a node have one child, we only consider the path that has child node. Recursively call function on both children and take 
+#              max(left, right)+1 as the depth. If a node has no child, it is a leaf and return 1
+# Time complexity: O(n)
+def minDepth(root: TreeNode) -> int:
     if root == None:            # reach end of branch
         return 0
     if root.left==None or root.right==None:                     # node has one or no child, one of them or both of recursice function will return zero
