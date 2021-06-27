@@ -1577,3 +1577,26 @@ def recoverTree(root: TreeNode) -> None:
                 wrong.append((prev, cur))
             prev, cur = cur, cur.right
     wrong[0][0].val, wrong[-1][1].val = wrong[-1][1].val, wrong[0][0].val   # swap nodes back to place
+
+# 59.102 Binary Tree Level Order Traversal ====================================== https://leetcode.com/problems/binary-tree-level-order-traversal/
+# Problem: Given the [root] of a binary tree, return the "level-order traversal" of its node values. Return node values in a 2D list, where each 
+#          element of the list is a sub-list that contains nodes in same level
+# Description: DFS while tracking node level. Create a helper function, that take a [node], its [level], and a 2D list [res] as parameters.
+#              Initally, the [node] is [root] and [level] is 0 since [root] is at depth 0. If len(res)<=level, means the current [node] comes from
+#              a new [level], and need to create a new sub-list in [res] to hold nodes from new level. Always append current [node] to res[level],
+#              and recursive invoke helper function on [node.left] and [node.right], with [level+1]. If [node] is None, means current path reach 
+#              end, end current traversal by returning
+# Time complexity: O(N)
+def levelOrder(root: TreeNode) -> List[List[int]]:
+    res = []
+    levelOrder_helper(root, 0, res)
+    return res  
+
+def levelOrder_helper(root, level, res):
+    if not root:                            # current path reach end
+        return
+    if len(res)<=level:                         # hits new level, add new sub-list to hold nodes from new level
+        res.append([])
+    res[level].append(root.val)                     # add current [node] to corresponding level in [res]
+    levelOrder_helper(root.left, level+1, res)          # recursive invoke on child nodes
+    levelOrder_helper(root.right, level+1, res)            
