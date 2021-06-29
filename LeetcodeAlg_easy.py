@@ -747,12 +747,12 @@ def minDepth(root: TreeNode) -> int:
 # 35.112 Path sum ================================================================== URL: https://leetcode.com/problems/path-sum/
 # Problem: Given a [root] of binary tree and an number [sum], check if there exists a path from root-to-leaf, that the sum of nodes on the path is equal to [sum].
 #          If such path exists return True, else return False. note: leaf is a node has no child  
-# Description: Recursively call function on left and right child of a node and decrease the target [sum] by the value of current node.
+# Description: DFS. Recursively call function on left and right child of a node and decrease the target [sum] by the value of current node.
 #              Base case is when a node is leaf, meaning it doesn't have node.left and node.right. Then if [sum] == node.val, then the path is found return True.
 #              If root == None, means it is at the end of branch and [sum] is not satisfied, return False.
 #              Call function on both children hasPathSum(left, sum-node.val) and hasPathSum(right,sum-node.val), if any of them return True. Whole function
 #              should return True
-def hasPathSum(self, root, sum):
+def hasPathSum(root: TreeNode, targetSum: int) -> bool:
     if not root: return False               # reach end of branch, and [sum] is not satisfied
     if not root.right and not root.left and sum==root.val:      # reach leaf node and [sum] is satisfied
         return True
@@ -2547,6 +2547,7 @@ def calPoints(ops):
 #              append its subordinates to [relation] and add [importance] to result. Keep doing this, until [relation] is empty
 # Time Complexity: O(n)
 # Space Comlexity: O(n)
+from collections import deque
 def getImportance(employees, id):
     lookup = {}
     for e in employees:
