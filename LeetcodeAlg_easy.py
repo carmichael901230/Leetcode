@@ -757,7 +757,7 @@ def hasPathSum(root: TreeNode, targetSum: int) -> bool:
     if not root.right and not root.left and sum==root.val:      # reach leaf node and [sum] is satisfied
         return True
     else:
-        return self.hasPathSum(root.left, sum-root.val) or self.hasPathSum(root.right,sum-root.val)     # recursively call function on left and right child
+        return hasPathSum(root.left, sum-root.val) or hasPathSum(root.right,sum-root.val)     # recursively call function on left and right child
 
 # 36.118 Yanghui's triangle ========================================================== URL: https://leetcode.com/problems/pascals-triangle/
 # Problem: Given integer number [numRows] represents number of rows. Return a 2d list of entire Yanghui's triangle from row 1 to row [numRows], where each 
