@@ -1600,3 +1600,34 @@ def levelOrder_helper(root, level, res):
     res[level].append(root.val)                     # add current [node] to corresponding level in [res]
     levelOrder_helper(root.left, level+1, res)          # recursive invoke on child nodes
     levelOrder_helper(root.right, level+1, res)            
+
+# 60.103 Binary Tree Zigzag Level Order Traversal ============================ https://leetcode.com/problems/binary-tree-zigzag-level-order-traversal/
+# Problem: Given a [root] of binary tree, return the "zig-zag" level order traversal. Return node values in a 2D list, where each 
+#          element of the list is a sub-list that contains nodes in same level
+#          Ex:           directions      res
+#                3         ->          [[3],[20,9],[15,7]]
+#             /   \                     
+#            9     20      <-
+#                /   \
+#               15    7    ->
+# Descrpiton: DFS while tracking [level]. Create a helper function, that takes [node], and 2D list [res] as parameter. Initially, the [node] is [root]
+#             and [level] is zero. Use "deque" to hold node of each level. If len(res)<=level, means the current [node] comes from a new [level], and 
+#             need to create a new "deque" to hold it. For even [level], "zig-zag" from left to right, append [node.val] to end of deque res[level]. 
+#             For odd [level], "zig-zag" from right to left, prepend [node.val] to beginning of deque res[level]. 
+#             At last, convert deque to list then return [res]
+from collections import deque
+def zigzagLevelOrder(root: TreeNode) -> List[List[int]]:
+    def helper(root, level, res: List[deque]):
+        if not root:
+            return
+        if len(res)<=level:                 # hits new level, expand [res] with a new deque
+            res.append(deque())
+        if level%2==0:                          # even [level] zig-zag from left to right
+            res[level].append(root.val)
+        else:                                   # odd [level] zig-zag from right to left
+            res[level].appendleft(root.val)
+        helper(root.left, level+1, res)
+        helper(root.right, level+1, res)
+    res = []
+    helper(root, 0, res)
+    return [list(deq) for deq in res]           # convert deques in [res] to list then return
