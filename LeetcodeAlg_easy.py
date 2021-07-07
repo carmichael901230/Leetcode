@@ -770,22 +770,21 @@ def hasPathSum(root: TreeNode, targetSum: int) -> bool:
 def generate(numRows):
     res = [[1]]
     for _ in range(1, numRows):
-        res.append(list(map(lambda x, y: x+y, res[-1]+[0], [0]+res[-1])))   # append and prepend [0] onto previous row, and add together map(prepend + append) 
-    return res[:numRows]                                                    # using list-slicing, if [numRows] == 0 return empty list
+        left, right = res[-1]+[0], [0]+res[-1]      # [left] is previous row append [0], [right] is previous row prepend [0]
+        for i in range(len(left)):                # sum up corresponding elements of [left] and [right] to get next row
+            left[i]+=right[i]
+        res.append(left)
+    return res                                                  
 
 # 37.119 Yanghui's triangle II ============================================================== URL: https://leetcode.com/problems/pascals-triangle-ii/
 # Problem: Given a row index [rowIndex] of Yonghui's triangle, return entire row of [rowIndex] as the type of list. Note: the first row is index 0
 # Description: Using property of Yanghui's triangle, number at Nth row index I is equal to N choose I.
 #              for instance: N=3 [3 choose 0, 3 choose 1, 3 choose 2, 3 choose 3] = [1, 3, 3, 1]. And n choose k = n!/(k!*(n-k)!)
-from math import factorial as f
-def getRow(rowIndex):
-    result = [1]                    # every row start with [1], when calculating a row always skip the first element 
-    for i in range(rowIndex):
-        result.append(nCk(rowIndex, i+1))         # calculate each index by calculating n choose k 
-    return result
-
-def nCk(n, k):                      # n choose k function
-    return int(f(n)/(f(k)*f(n-k)))
+import math
+def getRow(rowIndex: int) -> List[int]:
+    def nCk(k, n):                              # "n Choose k" helper function
+        return math.factorial(n)//(math.factorial(k)*math.factorial(n-k))
+    return [nCk(i, rowIndex) for i in range(rowIndex+1)]
 
 # 38.121 Best time to buy and sell stock ==================================== URL: https://leetcode.com/problems/best-time-to-buy-and-sell-stock/
 # Problem: Given a list of number representing a stock price in several continuous days, assume in these day a person can trade once(buy on one day, and sell
@@ -805,7 +804,7 @@ def maxOneTrade(prices):
         localMax = localMax - prices[i-1] + prices[i]               # the money made when sell on day i
         if localMax > maxProfit:
             maxProfit = localMax
-        if localMax < 0:            # if sell on day i will loss money, then reset [localMax] and find a later day to buy
+        elif localMax <= 0:            # if sell on day i will loss money, then reset [localMax] and find a later day to buy
             localMax = 0
     return maxProfit
 
