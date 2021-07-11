@@ -1631,3 +1631,46 @@ def zigzagLevelOrder(root: TreeNode) -> List[List[int]]:
     res = []
     helper(root, 0, res)
     return [list(deq) for deq in res]           # convert deques in [res] to list then return
+
+# 61.105 Construct Binary Tree from Preorder and Inorder Traversal ========= https://leetcode.com/problems/construct-binary-tree-from-preorder-and-inorder-traversal/
+# Problem: Given two lists that prepresent the "preorder" and "inorder" traversal of same binary tree. Construct the binary tree, and return its root.
+#          Both [preorder] and [inorder] consist of unique values
+# Descrption: The first element of [preorder] is always the "root", and nodes in left-subtree always come before nodes in right-subtree in [preorder].
+#             Find index of preorder[0] in [inorder], the elements comes before preorder[0] belong to left-subtree of "root", elements comes after preorder[0] belong 
+#             to right-subtree of "root". Leverage this property, each recursive call retrieve preorder[0], create a "TreeNode" with value=preorder[0]. Find [index] of 
+#             preoreder[0] in [inorder], since nodes of left-subtree comes first, then preorder[1:index] are nodes in left-subtree, and preorder[index+1:] are nodes
+#             in right-subtree. Similarly, inorder[:index] are left-subtree and inorder[index+1:] are right-subtree. Pass partitions of [preorder] and [inorder] to 
+#             build children of current [root]
+# Time complexity: O(n^2), [index] look up is linear, and [n] level of recursive
+def buildTree(preorder: List[int], inorder: List[int]) -> TreeNode:        
+    if preorder:
+        index = inorder.index(preorder[0])              # find index of preorder[0] in [inorder]
+        node = TreeNode(val=preorder[0])                # create current [root] with preorder[0]
+        # recursively build children of current [root]
+        node.left = buildTree(preorder[1:index+1], inorder[:index])         # preorder[1:index+1] and inorder[:index] contains nodes in left-subtree
+        node.right = buildTree(preorder[index+1:], inorder[index+1:])       # preorder[index+1:] and inorder[index+1:] contains nodes in right-subtree
+        return node
+    # when [preorder] is empty, means path hits end, thus return None
+    return None
+
+# Descrption: Maintain a Dictionary of inorder elements and their indices "{inorder[i]:i}" for quick preorder[0] index look up. Use [pre_beg], [pre_end],
+#             [in_beg], [in_end] to specify the range of [preorder] and [inorder] to be passed to next recursive call. Borrow same idea of previous,
+#             The first element of [preorder] is the "root", find index of preorder[0] in [inorder], denote as [ind]. Current "root" is preorder[0].
+#             inorder[in_beg:ind] are node of left-subtree, inorder[ind+1:in_end] are nodes in right-subtree. And we know the number of nodes in left-subtree
+#             is "[ind]-[in_beg]". Thus, sublist of [inorder] for left subtree is from [in_beg] to [ind], and for right subtree is from [ind+1] to [in_end]. 
+#             sublist of [preorder] for left subtree is from [pre_beg]+1 to [pre_beg]+1+[ind]-[in_beg], sublist for right subtree is fronm [pre_beg]+1+[ind]-[in_beg] 
+#             to [pre_end]. 
+# Time complexity: O(n), [ind] look up is constant
+def buildTree_2(preorder: List[int], inorder: List[int]) -> TreeNode:   
+    def helper(pre_beg, pre_end, in_beg, in_end):
+        if pre_beg<pre_end:                                     # [pre_beg]>=[pre_end] means 
+            ind = dic[preorder[pre_beg]]
+            root = TreeNode(preorder[pre_beg])
+            root.left = helper(pre_beg+1, pre_beg+1+ind-in_beg, in_beg, ind)        # pass sublist to build left subtree
+            root.right = helper(pre_beg+1+ind-in_beg, pre_end, ind+1, in_end)       # pass sublist to build right subtree
+            return root
+        return None
+            
+    dic = {num:i for i, num in enumerate(inorder)}          # create an "index" loop up dictionary for [inorder]
+    return helper(0, len(preorder), 0, len(inorder))
+
