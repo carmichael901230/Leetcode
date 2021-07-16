@@ -1642,7 +1642,7 @@ def zigzagLevelOrder(root: TreeNode) -> List[List[int]]:
 #             in right-subtree. Similarly, inorder[:index] are left-subtree and inorder[index+1:] are right-subtree. Pass partitions of [preorder] and [inorder] to 
 #             build children of current [root]
 # Time complexity: O(n^2), [index] look up is linear, and [n] level of recursive
-def buildTree(preorder: List[int], inorder: List[int]) -> TreeNode:        
+def buildTreePre(preorder: List[int], inorder: List[int]) -> TreeNode:        
     if preorder:
         index = inorder.index(preorder[0])              # find index of preorder[0] in [inorder]
         node = TreeNode(val=preorder[0])                # create current [root] with preorder[0]
@@ -1661,7 +1661,7 @@ def buildTree(preorder: List[int], inorder: List[int]) -> TreeNode:
 #             sublist of [preorder] for left subtree is from [pre_beg]+1 to [pre_beg]+1+[ind]-[in_beg], sublist for right subtree is fronm [pre_beg]+1+[ind]-[in_beg] 
 #             to [pre_end]. 
 # Time complexity: O(n), [ind] look up is constant
-def buildTree_2(preorder: List[int], inorder: List[int]) -> TreeNode:   
+def buildTreePre_2(preorder: List[int], inorder: List[int]) -> TreeNode:   
     def helper(pre_beg, pre_end, in_beg, in_end):
         if pre_beg<pre_end:                                     # [pre_beg]>=[pre_end] means 
             ind = dic[preorder[pre_beg]]
@@ -1674,3 +1674,70 @@ def buildTree_2(preorder: List[int], inorder: List[int]) -> TreeNode:
     dic = {num:i for i, num in enumerate(inorder)}          # create an "index" loop up dictionary for [inorder]
     return helper(0, len(preorder), 0, len(inorder))
 
+# 62.106 Construct Binary Tree from Inorder and Postorder Traversal ======= https://leetcode.com/problems/construct-binary-tree-from-inorder-and-postorder-traversal/
+# Problem: Given two list [inorder] and [postorder] representing "inorder" and "postorder" traversal of a binary tree. Construct the binray tree and return its root
+# Description: "inorder" traversal is left-root-right, "postorder" traversal is left-right-root. Thus, the "root" is always the last element of "postorder". And in 
+#              "inorder", nodes of left-subtree are on the left-side of "root", nodes of right-subtree are on right-side of "root".Each recursive call, we can get
+#              "root" from "postorder", and from "inorder" we know the number of nodes in left-subtree and right-subtree. Then for "inorder" and "postorder" lists 
+#              we can divide them into two parts that contains left/right-subtree respectively. 
+#              Maintain a dictionary that map "postorder" values and indices {postorder[i]:i} for quick index look up. Maintain indices [post_beg], [post_end], 
+#              [in_beg] and [in_end] that specify the list range of [postorder] and [inorder] list in current recursive level
+# Time complexity: O(n)
+def buildTree(inorder: List[int], postorder: List[int]) -> TreeNode:
+    def helper(in_beg, in_end, post_beg, post_end):
+        if post_beg >= post_end: 
+            return None
+        ind = dic[postorder[post_end-1]]
+        root = TreeNode(postorder[post_end-1])
+        root.left = helper(in_beg, ind, post_beg, post_beg+ind-in_beg)
+        root.right = helper(ind+1, in_end, post_beg+ind-in_beg, post_end-1)
+        return root
+    dic = {num:i for i, num in enumerate(inorder)}
+    return helper(0, len(inorder), 0, len(postorder))
+
+# 63.107 Binary tree level order traversal II =================================== URL: https://leetcode.com/problems/binary-tree-level-order-traversal-ii/
+# Problem: Bottom-up level order traversal, given a root of a binary tree, return a 2D list where nodes of same level are wrapped in same sub-list,
+#          and highest level is at the beginning of the list, root is at the end of the list.
+# Description: DFS with [level] count. Use a helper function, which tracks [level] as the "depth" of current node. Maintain [res] as 2D result list, where
+#              "i"th element contains nodes at "i"th depth. Return reversed [res] at the end as "bottom-up" level order traversal.
+#              Initally, helper function takes [root] as starting node, [level] = 0, and [res] is an empty list
+#              In helper function. if len(res)<=level, means a new level is hit and need to create a new sub-list in [res] to hold nodes of new level.
+#              Add current [node] to its corresponding level res[level].append(node.val). Then invoke helper function on [node.left] and [node.right]
+#              with [level+1]. If current [node] is None, then stop current path by returning
+# Time Complexity: O(n)
+def levelOrderBottom(root: TreeNode) -> List[List[int]]:
+    res = []
+    levelOrderBottom_helper(root, 0, res)
+    return res[::-1]
+
+def levelOrderBottom_helper(root, level, res):
+    if not root:                # hit None, end current path
+        return
+    if len(res)<=level:             # a new level is hit, add new sub-list to hold nodes from new level
+        res.append([])
+    res[level].append(root.val)         # add current node to corresponding level
+    levelOrderBottom_helper(root.left, level+1, res)            # invoke function on child nodes
+    levelOrderBottom_helper(root.right, level+1, res)
+
+# 64.109 Convert Sorted List to Binary Search Tree ================================ https://leetcode.com/problems/convert-sorted-list-to-binary-search-tree/
+# problem: Given the [head] of a linked list, whose nodes are sorted in ascending order. Convert it to a height balanced BST, and return the root.
+# Description: Recursive. Use two pointer [slow] and [fast] to find the middle node [mid], [slow] starts from [head] and [fast] starts from [head.next.next]. 
+#              Traverse [slow] and [fast] towards tail, [slow] moves a node at a time, [fast] moves two nodes at a time. When [fast] or [fast.next] reach end, 
+#              [slow.next] is [mid]. Use [mid] to make [root] of current recursion, and nodes between [head] and [slow] is the sublist that belongs to 
+#              left-subtree, and nodes from [mid.next] to end is the sublist that belongs to right-subtree. Break the connect between [slow] and [mid] to 
+#              separate left and right sublist.
+# Time compexity: O(NlogN), O(N) to build node for a level, there are O(logN) levels
+def sortedListToBST(head: ListNode) -> TreeNode:
+    if not head:
+        return None
+    if not head.next:
+        return TreeNode(head.val)
+    slow, fast = head, head.next.next               # use [slow] and [fast] to search for [mid]
+    while fast and fast.next:
+        slow, fast = slow.next, fast.next.next
+    mid = slow.next
+    slow.next = None                                # break connection between left and right sublist
+    root = TreeNode(mid.val)
+    root.left = sortedListToBST(head)               # build left subtree with nodes from [head] to [slow]
+    root.right = sortedListToBST(mid.next)          # build right subtree with nodes from [mid.next] to end
+    return root       
