@@ -789,23 +789,19 @@ def getRow(rowIndex: int) -> List[int]:
 # 38.121 Best time to buy and sell stock ==================================== URL: https://leetcode.com/problems/best-time-to-buy-and-sell-stock/
 # Problem: Given a list of number representing a stock price in several continuous days, assume in these day a person can trade once(buy on one day, and sell
 #          on a later day). Find and return the maximum profit this person can make in those days.
-# Description: Kadane's Alg. Calculate the profit of buying on previous day and selling on next day, Starting with buying stock on day 1 (index 0) and sell
-#              it on the next day (index 1). The profit earned is "localMax=prices[i]-prices[i-1]", compare [localMax] with [maxProfit] to update [maxProfit].
-#              Move on to next iteration, where undo the sell on day 2 and sell it on day 3. The profit earned from buying on day 1 and sell on day 3 is
-#              "localMax=localMax-prices[i-1]+prices[i]", the old [localMax] is "prices[i-1]-prices[i-2]". Thus the current [localMax] becomes 
-#              "localMax=-prices[i-2]+prices[i-1]-prices[i-1]+prices[i] = -prices[i-2]+prices[i]". Iterating through [prices], if [localMax]<0, then 
-#              reset [localMax] to zero, since sell on current day is not profitable and we should look for a future day to buy. Keep tracking [maxProfit]
-#              along the iteration, return it at the end
+# Description: Kadane's Alg. Calculate the profit of buying on previous day and selling on next day, Starting with buying stock on day 1 (index i) and sell
+#              it on the next day (index i+1). The profit earned is "localMax=prices[i+1]-prices[i]", compare [localMax] with [maxProfit] to update [maxProfit].
+#              Iterating through [prices], if [localMax]<0, then reset [localMax] to zero, since sell on current day is not profitable and we should look for 
+#              a future day to buy. Keep tracking [maxProfit] along the iteration, return it at the end
 # Time Complexity: O(n)
-from sys import maxsize
-def maxOneTrade(prices):
+def maxProfit(prices: List[int]) -> int:
     maxProfit = localMax = 0
-    for i in range(1,len(prices)):
-        localMax = localMax - prices[i-1] + prices[i]               # the money made when sell on day i
-        if localMax > maxProfit:
-            maxProfit = localMax
-        elif localMax <= 0:            # if sell on day i will loss money, then reset [localMax] and find a later day to buy
+    for i in range(len(prices)-1):
+        localMax += prices[i+1]-prices[i]       # calculat profit made by buying on [i] and sell on [i+1]
+        if localMax <= 0:                   # sell on day [i+1] is not profitable, reset [localMax]
             localMax = 0
+        else:
+            maxProfit = max(maxProfit, localMax)
     return maxProfit
 
 # 39.122 Best Time to Buy and Sell Stock II ========================================= URL: https://leetcode.com/problems/best-time-to-buy-and-sell-stock-ii/
@@ -829,7 +825,7 @@ def maxProfit(prices):
         while i<len(prices)-1 and prices[i]<prices[i+1]:        
             i+=1
         sell = prices[i]
-        profit += (sell-buy)                # caluclate profit of current [buy]&[sell] 
+        profit += sell-buy                # caluclate profit of current [buy]&[sell] 
     return profit
 
 # 40.125 Valid palindrome ======================================================== URL: https://leetcode.com/problems/valid-palindrome/
@@ -842,11 +838,11 @@ def maxProfit(prices):
 def isPalindrome_2(s: str) -> bool:
     l, r = 0, len(s)-1
     while l < r:
-        while l < r and not s[l].isalnum():
+        while l < r and not s[l].isalnum():     # find next letter/number for [left]
             l += 1
-        while l <r and not s[r].isalnum():
+        while l <r and not s[r].isalnum():      # find next letter/number for [right]
             r -= 1
-        if s[l].lower() != s[r].lower():
+        if s[l].lower() != s[r].lower():        # compare lowercase of [left] and [right]
             return False
         l +=1
         r -= 1
