@@ -831,9 +831,9 @@ def maxProfit(prices):
 # 40.125 Valid palindrome ======================================================== URL: https://leetcode.com/problems/valid-palindrome/
 # Problem: Given a string of sentence including punctuation, alpha letters, numbers and space, check if this string is palindrome when only consider
 #          alpha letters and numbers. Return True if it is palindrome, and return False otherwise.
-# Description: Two pointers. Maintain two pointers [l] and [r] start from left and right of [s]. Use ".isalnum()" to skip char s[l] or s[r] that is
+# Description: Two pointers. Maintain two pointers [l] and [r] start from left and right of [s]. Use ".isalnum()" to skip char that is
 #              not a alphabet or number. When both s[l] and s[r] are alphabet or number, compare them and return False if they are different,
-#              move [l] and [r] towards each other after each comparison. Return True at the end, since every character in [s] are checked
+#              move [l] and [r] towards each other after each comparison. Return True when [l] and [r] meet, since every character in [s] are checked
 # Time Complexity: O(n)
 def isPalindrome_2(s: str) -> bool:
     l, r = 0, len(s)-1
@@ -870,7 +870,7 @@ def singleNumber(nums):
 def hasCycle(head):
     slow = fast = head
     while fast and fast.next:
-        fast = fast.next.next
+        fast = fast.next.next       # move [slow] and [fast] before comparision
         slow = slow.next
         if slow == fast:
             return True
@@ -924,9 +924,10 @@ def getIntersectionNode(headA, headB):
         if ptA == ptB:
             return ptA
         ptA, ptB = ptA.next, ptB.next
-        if not ptA and not jumpToNext:
+        # reset [ptA] or [ptB] and make sure only reset once
+        if not ptA and not jumpToNext:          # reset [ptA] to [headB] when it hits end
             ptA, jumpToNext = headB, True
-        if not ptB:
+        if not ptB:                             # reset [ptB] to [headA] when it his end
             ptB = headA
     return None
 
@@ -3153,3 +3154,21 @@ def subdomainVisits(cpdomains: List[str]) -> List[str]:
     for k, v in record.items():                         # convert Counter to list
         res.append(str(v)+ " "+k)
     return res
+
+# 150.812 Largest Triangle Area =========================================================== https://leetcode.com/problems/largest-triangle-area/
+# Problem: Given a 2D list [points], where each element represent a point points[i] = [xi, yi]. Pick three points from [points] to form a triangle
+#          so that the area of triangle is largest. Return the largest area
+# Description: Brutal Force. Iterate all possible combination of picking three points from [points], calculate their area and find maximum.
+#              For each combination, the area can be calculated as follow. Assume we picked three points, A(xa, ya), B(xb, yb) and C(xc, yc). 
+#              And add a point O(xo, yo), where xo=xa, and yo=yb. So that AO and OB are perpenticular. The area of ABC is splited into three
+#              parts AOB+AOC+COB. Where AOB = (xb-xa)(ya-yb)/2, AOC = (xa-xc)(ya-yb)/2, COB = (xb-xa)(yb-yc)/2. 
+# Time complexity: O(N^3), N=len(points)
+def largestTriangleArea(points: List[List[int]]) -> float:
+    res = 0
+    # iterate all combination of three points
+    for a in points:
+        for b in points:
+            for c in points:
+                area = (a[0]-b[0])*(a[1]-c[1])+(c[0]-a[0])*(a[1]-c[1])+(c[0]-a[0])*(c[1]-b[1])      # use formuale to get area of ABC
+                res = max(area, res)
+    return res/2
