@@ -950,10 +950,17 @@ def twoSumII(arr, target):
 
 # 46.168 Convert integer to A-Z column titles =================== URL: https://leetcode.com/problems/excel-sheet-column-title/
 # Problem: Given an integer convert and return the form of Excel column titles, ex: A B ... Z AA AB .. AZ BA ... AAA AAB...
-# Description: Twenty-six hex. Recursively bring down number by 1 then divide it by 26, quotation parts keep going into recursive call
-#              reminder produces an character using chr(reminder + ord("A")). If quotation is zero, return empty string
-def convertToTitle(n):
-    return convertToTitle((n - 1) // 26) + chr((n - 1) % 26 + ord('A')) if n else ""
+# Description: Twenty-six hex, and use "ord()" and "chr()"". Maintain [res] to track reversed result stirng. Every interation, 
+#              subtract [columnNumber] by 1  since [columnNumber] starts from 1. Mod [columnNumber] by 26 to get current letter, 
+#              divide [columnNumber] by 26 to extract current letter from "pool". Append current letter to the end of [res], 
+#              return reversed [res]
+def convertToTitle(self, columnNumber: int) -> str:
+    res = ""
+    while columnNumber:
+        columnNumber -= 1
+        res += chr((columnNumber)%26+ord('A'))      # get current letter
+        columnNumber = (columnNumber)//26           # extract value of current letter from [columnNumber]
+    return res[::-1]
     
 # 47.42 Trapping Rain Water ============================= URL: https://leetcode.com/problems/trapping-rain-water/
 # Problem: Given a non-negative integer array, where each integer in the array represents the height of a wall and assume each index
