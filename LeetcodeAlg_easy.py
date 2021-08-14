@@ -933,7 +933,7 @@ def getIntersectionNode(headA, headB):
 
 # 45.167 Two sum of sorted array ============================= URL: https://leetcode.com/problems/two-sum-ii-input-array-is-sorted/
 # Problem: Given a sorted array, and a integer [target], need to find two number in the [array] that the sum of two number equal to [target].
-#          Return indices of the two numbers
+#          Return the indices of the two numbers (1-indexed) as an integer array answer of size 2
 # Description: Use two pointers one starts from left of array and the other starts from the end of array. Compute sum, if [sum] < [target] then
 #              increase the sum by moving left pointer to the right. If [sum] > [target] then decrease [sum] by moving right pointer to left
 # Time complexity: O(n)
@@ -941,10 +941,10 @@ def twoSumII(arr, target):
   l, r = 0, len(arr)-1
   while l<r:
     s = arr[l]+arr[r]
-    if s == target: return [l+1, r+1]
-    elif s>target:
+    if s == target: return [l+1, r+1]       # return indices as "1-indexed" 
+    elif s>target:      # sum too large, move [r] to left
       r-=1
-    else:
+    else:               # sum too small, move [l] to right
       l+=1
   return None
 
