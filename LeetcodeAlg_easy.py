@@ -954,7 +954,7 @@ def twoSumII(arr, target):
 #              subtract [columnNumber] by 1  since [columnNumber] starts from 1. Mod [columnNumber] by 26 to get current letter, 
 #              divide [columnNumber] by 26 to extract current letter from "pool". Append current letter to the end of [res], 
 #              return reversed [res]
-def convertToTitle(self, columnNumber: int) -> str:
+def convertToTitle(columnNumber: int) -> str:
     res = ""
     while columnNumber:
         columnNumber -= 1
@@ -966,27 +966,24 @@ def convertToTitle(self, columnNumber: int) -> str:
 # Problem: Given a non-negative integer array, where each integer in the array represents the height of a wall and assume each index
 #          has width of 1. Need to find how many unit of water can be hold in the array. 
 #          ex: [1,0,3] => 1, can hold 1 unit of water at index of 1.
-# Description: Use two pointers start from the two ends of array, Compare the height of two pointers and only consider the lower one,
-#              because the water level is decided by lower wall. Update the highest wall of the lower side, and any wall that is lower
-#              than the highest wall means water can be filled in.
+# Description: Use two pointers start from the two ends of array. Track and compare the height of two pointers and move pointer of 
+#              lower side, because the water level is decided by lower wall. Update the highest wall of the lower side, and any wall 
+#              that is lower than the highest wall means water can be filled in.
 # Time Complexity: O(n)
-def trap(height):
+def trap(height: List[int]) -> int:
     left, right = 0, len(height)-1
-    leftMax = rightMax = area = 0
+    leftHeight, rightHeight = max(0, height[left]), max(0, height[right])       # tracking highest of [left] and [right]
+    res = 0
     while left<right:
-        if height[left]<height[right]:      # consider the lower wall
-            if height[left]>leftMax:        
-                leftMax = height[left]      # update to a taller wall
-            else:
-                area += leftMax - height[left]  # fill water into gaps
+        # lower side is considered to fill water
+        if leftHeight<rightHeight:
             left += 1
+            res += max(min(leftHeight, rightHeight)-height[left], 0)
         else:
-            if height[right]>rightMax:      # update to a taller wall
-                rightMax = height[right]
-            else:
-                area += rightMax - height[right]    # fill water into gaps
             right -= 1
-    return area
+            res += max(min(leftHeight, rightHeight)-height[right], 0)
+        leftHeight, rightHeight = max(leftHeight, height[left]), max(rightHeight, height[right])        # update highest
+    return res
 
 # 48.169 Majority Element ============================== URL: https://leetcode.com/problems/majority-element/
 # Problem: Given an array of integers, there exists an element that appears more than n//2 times in the array,
