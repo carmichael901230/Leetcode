@@ -8,7 +8,12 @@ class TreeNode:
         self.val = val
         self.left = left
         self.right = right
-
+class Node:
+    def __init__(self, val: int = 0, left: 'Node' = None, right: 'Node' = None, next: 'Node' = None):
+        self.val = val
+        self.left = left
+        self.right = right
+        self.next = next
 # 1.2 Add Two Numbers ============================================================ https://leetcode.com/problems/add-two-numbers/
 # Problem: Given two non-empty linked list [l1], [l2]. Two linked lists represent two non-negative integers, where each digit is 
 #          stored as node in reverse order. Sum up both linked list and return the sum as a linked list.
@@ -1787,3 +1792,29 @@ class FlattenBinaryTree:
         root.left = None                # set its [left] to None
         self.prev = root                # update [prev] to current node
 
+# 67.116 Populating Next Right Pointers in Each Node ==================== https://leetcode.com/problems/populating-next-right-pointers-in-each-node/
+# Problem: Given the [root] of a "perfect binary tree", where all leaves are on the same level. And every non-leaf node has two childen. The node
+#          has reference to "left", "right" and "next", as following
+#          struct Node {
+#               int val;
+#               Node *left;
+#               Node *right;
+#               Node *next; 
+#          }
+#          Populate each next pointer to point to its next right node. If there is no right node, then points to None
+# Description: DFS. For a [node]. [node.left] connects to [node.right], and [node.right] connect to [node.next.left].
+#                       node ----------> node.next --> None
+#                       /  \              /    \
+#                   left -> right ---> left --> right --> None
+#              Recursivly call on [node.left] and [node.right] to build next level. If [node] is None, return to stop
+def connect(root: 'Node') -> 'Node':
+    if not root:
+        return
+    if root.left:                               # connect [left] to [right]
+        root.left.next = root.right
+    if root.right:                              # connect [right] to [node.next.left]
+        root.right.next = root.next.left if root.next else None
+    connect(root.left)
+    connect(root.right)
+    return root
+            
