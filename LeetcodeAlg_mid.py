@@ -49,7 +49,7 @@ def addTwoNumbers(l1: ListNode, l2: ListNode) -> ListNode:
 # Time complexity: O(N)
 def lengthOfLongestSubstring(s: str) -> int:
     track = {}
-    max_length = start = 0
+    max_length = start = 0          # [start] represent the starting index of current substring
     for i, c in enumerate(s):
         # duplicate detected in current substring
         if c in track and start <= track[c]:                
@@ -660,7 +660,7 @@ def multiply(num1: str, num2: str) -> str:
 #              If [furthest] touches or exceeds the end of [nums], return [jumps]
 # Time Complexity: O(n), n=len(nums)
 def jump(nums: List[int]) -> int:
-    if len(nums)<=0:
+    if len(nums)<=1:                                # corner case, no need to jump, already start at the end of [nums]
         return 0
     furthest = lastJump = jumps = 0
     for i in range(len(nums)):
@@ -668,7 +668,7 @@ def jump(nums: List[int]) -> int:
         if i == lastJump:                           # when [i] touches last jump location, make a jump to [furthest]
             lastJump = furthest
             jumps+=1
-        if furthest >= len(nums)-1:                 # reaches the end of [nums] return [jumps]
+        if lastJump >= len(nums)-1:                 # reaches the end of [nums] return [jumps]
             return jumps    
 
 # 24.46 Permutations ============================================================================== https://leetcode.com/problems/permutations/
@@ -1741,3 +1741,49 @@ def sortedListToBST(head: ListNode) -> TreeNode:
     root.left = sortedListToBST(head)               # build left subtree with nodes from [head] to [slow]
     root.right = sortedListToBST(mid.next)          # build right subtree with nodes from [mid.next] to end
     return root       
+
+# 65.113 Path Sum II =========================================================================================== https://leetcode.com/problems/path-sum-ii/
+# Problem: Given the [root] of a binary tree and an integer [targetSum]. Return all "root-to-leaf" path that the nodes along the path sum up to [targetSum]
+#          Return the result as 2D list, where each element consists of nodes in a path
+# Description: DFS. Implement a helper function, that maintain [res] as the result 2D list, maintain [temp] that consists nodes along a path, maintain 
+#              [targetSum] representing the remaining sum after subtracting node values in [temp], and the current node [root]
+#              If current node [root] is a leaf that has not child, and [targetSum]==[root.val], meaning a path is found then append [temp] to [res]. If
+#              [root] hit end of path, means this path doesn't qualify, stop current recursion by returning. Each recursion, reduce [targetSum] by [root.val]
+#              and append [root.val] to [temp], then search both [root.left] and [root.right] subtrees.
+def pathSum2(root: TreeNode, targetSum: int) -> List[List[int]]:
+    def helper(root, temp, targetSum, res):
+        if not root:                        # DFS hit end, stop current DFS
+            return
+        if not root.left and not root.right:        # hit leaf
+            if root.val == targetSum:                   # qualified path is found. append [temp] to [res]
+                temp.append(root.val)
+                res.append(temp)
+                return
+            else:
+                return
+        helper(root.left, temp+[root.val], targetSum-root.val, res)     # recursion on left child
+        helper(root.right, temp+[root.val], targetSum-root.val, res)    # recursion on right child
+    res = []
+    helper(root, [], targetSum, res)
+    return res
+
+# 66.114 Flatten Binary Tree to Linked List ===================================== https://leetcode.com/problems/flatten-binary-tree-to-linked-list/
+# Problem: Given [root] of a binary tree, flatten it to a linked list. The linked list use [root] as its "head", and "right" child points to next
+#          node, and "left" node is set to None. The linked list follow "pre-order" traversal order. (root-left-right)
+# Description: Post-order traversal and a global variable [prev] tracking previous node to connect with. Use "post-order" traversal to construct 
+#              the linked list from right to left. [prev] is the head of previously created linked list, and need to be appended to the [right] of current 
+#              node. After traverse [left] and [right] of a node, connect [prev] to [right] of current node, set [left] to None and update [prev] to
+#              current node, since current node is the new head of previously created linked list
+class FlattenBinaryTree:
+    def __init__(self):
+        self.prev = None                # tracking the head of previously created linked list
+    def flatten(self, root: TreeNode) -> None:
+        if not root:
+            return
+        # "post-order" traverse
+        self.flatten(root.right)        
+        self.flatten(root.left)
+        root.right = self.prev          # append previously created linked list to current node
+        root.left = None                # set its [left] to None
+        self.prev = root                # update [prev] to current node
+
