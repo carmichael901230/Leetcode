@@ -993,17 +993,16 @@ def trap(height: List[int]) -> int:
 #              must end up with a number larger than 0. We will have a [count] and [major] to track the count of an element after cancelling
 #              the count of other element, [major] will record the current element which is being tracked.
 # Time Complexity: O(n)
-def majorityElement(nums):
-    major, cnt = nums[0], 0
-    for n in nums:
-        if cnt == 0:
-            cnt += 1
-            major = n
-        elif major == n:
+def majorityElement(nums: List[int]) -> int:
+    cur, cnt = nums[0], 0
+    for num in nums:
+        if cur == num:
             cnt += 1
         else:
             cnt -= 1
-    return major
+            if cnt == 0:                # reset [cur] and [cnt]
+                cur, cnt = num, 1
+    return cur
 
 # 49.171 Excel Sheet Column Number ======================== URL: https://leetcode.com/problems/excel-sheet-column-number/
 # Problem: Given a string of Excel Sheet Column Number, convert it to integer number. ex A=>1, Z=>26, AB=>28
