@@ -1009,25 +1009,23 @@ def majorityElement(nums: List[int]) -> int:
 # Description: Each character represents an integer number of base 26. Split the input string into list, and start from right most of the list
 #              calculate the difference between the [char] of list with "A". Since "A"=1 instead of "A"=0, the integer representation is the
 #              difference between [char] and "A" plus 1. 
-def titleToNumber(s):
-    l = list(s)
-    base = 1
-    num = 0
-    for char in reversed(l):
-        num += (ord(char)-ord("A")+1) * base
+def titleToNumber(columnTitle: str) -> int:
+    res, base = 0, 1
+    for c in reversed(columnTitle):
+        res += (ord(c) - ord('A')+1)*base
         base *= 26
-    return num
+    return res
 
 # 50.172 Factorial Trailing Zeroes ================================= URL: https://leetcode.com/problems/factorial-trailing-zeroes/
 # Problem: Given an positive integer n, count how many zeroes are at end of n!.
 # Description: Number of zeroes at the end, depends on how many fives between 1 to n. Because any even number time 5 always produces tens.
 #              Therefore, counting zeroes is same as counting fives
-def trailingZeroes(n:int) -> int:
-    fives = 0
-    while n != 0:
+def trailingZeroes(n: int) -> int:
+    res = 0
+    while n>0:
         n //= 5
-        fives += n
-    return fives
+        res += n
+    return res
 
 # 51.202 Happy Number ================================================ URL: https://leetcode.com/problems/happy-number/
 # Problem: Happy number is a positive integer that if that the sum of square of each digit call it [sum], and then repeat the same process
@@ -1055,10 +1053,11 @@ def help(n:int, track: list) -> bool:
 #              If k is greater than length, k%n can get rid of exceeded part. If k is negative, k%n can convert from rotate left by k
 #              rotate right by length-k. If k is negative and |k| > length, then k%n can first get rid of exceeded part and convert from
 #              rotate left to right.
-def rotate(nums, k):
-    n= len(nums)
-    k = k%n
-    nums[:] = nums[n-k:] + nums[:n-k]
+def rotate(nums: List[int], k: int) -> None:
+    if len(nums)<=1 or k == 0:          # early termination
+        return nums
+    rotates = k%len(nums)
+    nums[:] = nums[len(nums)-rotates:]+nums[:len(nums)-rotates]     # use "nums[:]" to deep copy
 
 # 52.190 Reverse Bits ========================================= URL: https://leetcode.com/problems/reverse-bits/
 # Problem: Given a 32 bit unsigned bitwise number, return the bitwise reversed number
