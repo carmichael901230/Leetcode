@@ -1027,24 +1027,24 @@ def trailingZeroes(n: int) -> int:
         res += n
     return res
 
-# 51.202 Happy Number ================================================ URL: https://leetcode.com/problems/happy-number/
+# 51.202 Happy Number ================================================================= URL: https://leetcode.com/problems/happy-number/
 # Problem: Happy number is a positive integer that if that the sum of square of each digit call it [sum], and then repeat the same process
 #          by replace the number with [sum]. Keep doing this if [sum] == 1 at some point, then the original number is called Happy Number
 #          Given a positive integer [n], determine if [n] is a Happy Number
 # Description: If a number is not a Happy Number, then repeating the process above, the [sum] will fall into a pattern, where [sum] will 
 #              occur in a repeated loop. Therefore, keep tracking the [sum] of each iteration, if a [sum] is repeated, then [n] is not Happy
 #              Otherwise, if [sum] hit 1 at some point, [n] is Happy
-def isHappy(n:int) -> bool:
-    return help(n,[])
-
-def help(n:int, track: list) -> bool:
-    result = sum(int(i)**2 for i in str(n))
-    if result in track:
-        return False
-    if result == 1:
-        return True
-    track.append(result)
-    return help(result, track)
+def isHappy(n: int) -> bool:
+    record = set()                      # [record] track occurance of [sum]
+    while True:
+        s = sum(int(c)**2 for c in str(n))      # get [sum] of current [n]
+        # check repeatness of [sum]
+        if s in record:                 
+            return False
+        if s == 1:
+            return True
+        record.add(s)
+        n = s                           # update [n] with last [sum]
 
 # 52.189 Rotate Array ======================================= URL: https://leetcode.com/problems/rotate-array/
 # PProblem: Given a array [arr] and an integer [k], modify [arr] in place by rotate the array to the right by k steps.
@@ -1061,15 +1061,16 @@ def rotate(nums: List[int], k: int) -> None:
 
 # 52.190 Reverse Bits ========================================= URL: https://leetcode.com/problems/reverse-bits/
 # Problem: Given a 32 bit unsigned bitwise number, return the bitwise reversed number
-# Description: Use bitwise shift.
-''' Note: This method doesn't work in Python3, since Python3 can't take integer with leading Zeros'''
-def reverseBits(n):
-    ans = 0
+# Description: Use bitwise shift. Use "num & 1" to get last bit digits from [n], add last bit digits to [res]. Shift [n] to right to
+#              get next bit(n>>=1) and shift [res] to left to reserve space for next bit(res<<=1)
+# Time complexity: O(lgN)
+def reverseBits(n: int) -> int:
+    res = 0
     for _ in range(32):
-        ans <<= 1
-        ans += (n & 1)
+        res += n&1          # get last bit from [n]
+        res <<= 1
         n >>= 1
-    return ans
+    return res>>1           # shift [res] to proper digit before return
 	
 # 53.203 Remove Linked List Element ========================= URL: https://leetcode.com/problems/remove-linked-list-elements/
 # Problem: Given the [head] of a linked list(possibly empty), and a value [val]. Return the head of new linked list, with all 
