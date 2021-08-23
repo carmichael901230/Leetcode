@@ -1817,4 +1817,35 @@ def connect(root: 'Node') -> 'Node':
     connect(root.left)
     connect(root.right)
     return root
-            
+
+# 68.117 Populating Next Right Pointers in Each Node II ============= https://leetcode.com/problems/populating-next-right-pointers-in-each-node-ii/
+# Problem: Given the [root] of a bianry tree, where the tree may not be "perfect binary tree". Populate each next pointer to point to its next 
+#          node on right. If there is no next-right node, point the next point to None.. The node has references to "left", "right", and "next":
+#               struct Node {
+#                   int val;
+#                   Node *left;
+#                   Node *right;
+#                   Node *next; 
+#               }
+# Description: Maintian [prev] as node in previous level that [prev.left] and [prev.right] are nodes in current level. [dummy] refers to the "head"
+#              node of current level, where [dummy.next] is the first node on current level. [cur] refers to the current node, that is used to 
+#              connect "next-right" node. 
+#              Start with [prev] at [root]. And traverse though each level, [dummy] and [cur] start from first node of next level. Assign [prev.left]  
+#              and [prev.right] to [cur.next] if they exists. Update [prev] to [prev.next] and update [cur] to [cur.next] to build tree horizontally.
+#              When [prev] hits None, means traverse of current level is finished. Start traverse next level, update [prev] with [dummy.next].
+#              If [prev] is still None after updating, means the entire traversal is finished. 
+def connect(self, root: 'Node') -> 'Node':
+    prev = root
+    while prev:                         # build completed if outter [prev] is None
+        cur = dummy = Node(0)               # [dummy] track first node of current level
+        # traverse and build current level
+        while prev:
+            if prev.left:
+                cur.next = prev.left
+                cur = cur.next
+            if prev.right:
+                cur.next = prev.right
+                cur = cur.next
+            prev = prev.next                # move [prev] horizontally to continue build current level
+        prev = dummy.next               # move [prev] to the beginning of next level
+    return root
