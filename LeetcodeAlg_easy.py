@@ -1077,10 +1077,10 @@ def reverseBits(n: int) -> int:
 #		   nodes with [val] removed.
 # Description: Firstly set a dummy node at beginning. Look at current.next, if cur.next==val, then skip next node by cur.next=cur.next.next
 #			   Otherwise, move onto next node, cur=cur.next
-
-def removeElements( head: ListNode, val: int) -> ListNode:
-    cur = dummy = ListNode(0, head)
-    while cur and cur.next: 
+# Time Complexity: O(n)
+def removeElements(head: Optional[ListNode], val: int) -> Optional[ListNode]:
+    dummy = cur = ListNode(0, head)
+    while cur and cur.next:
         if cur.next.val == val:
             cur.next = cur.next.next
         else:
@@ -1090,18 +1090,27 @@ def removeElements( head: ListNode, val: int) -> ListNode:
 # 54.204 Count Prime =========================================== URL: https://leetcode.com/problems/count-primes/
 # Problem: Count and return number of prime number less than a given non-negative integer [n]
 # Description: User sort of reversed "Sieve of Eratosthenes" method. Create a list [primes] with length [n], initially all True.
-# 			   Each element represent the index number is prime or not. Iterate [i] from 2 to sqrt(n)+1, if primes[i] is True,
-#			   all mutiply of [i] are False, multiple of [i] are "i*(i+k)", where k=0,1,2,3,... Thus, convert primes[i*i:n:i] to
-#              False. Count number of "True"s in primes at the emd
-# Time Complexity: O(n) 
+# 			   Each element represent the index number is prime or not. Iterate [i] from 2 to sqrt(n)+1. Set the upper boundary 
+#              to sqrt(n)+1, because number larger than [n] is covered by [product]. If primes[i] is True, all mutiply of [i] 
+#              are False, multiple of [i] are "i*(i+k)", where k=0,1,2,3,..., also [product] produce with k<[i] are covered by 
+#              other combination. Thus, convert primes[i*i:n:i] to False. Count number of "True"s in primes at the end		   
+# Time Complexity: O(N*log(logN))
+#                  For number [i], there are [n/i] elements to be marked as False, where [i] is prime number. 
+#                  There has n/2+n/3+n/5+n/7+n/13+..., according to "Harmonic Progression of the sum of primes". The sum is 
+#                  less than N*(log(logN))
 def countPrimes(n):
     if n < 3:
         return 0
     primes = [True] * n
     primes[0] = primes[1] = False
-    for i in range(2, int(n ** 0.5) + 1):
+    for i in range(2, int(n ** 0.5) + 1):       # set upper limit to "sqrt(n)+1", because [n] larger than sqrt(n) is coverde
         if primes[i]:
-            primes[i * i: n: i] = [False] * len(primes[i * i: n: i])	# convert multiply of i to False
+            multi = i
+            product = i*multi               # [product] starts from [i*i]
+            while product < n:
+                primes[product] = False
+                multi += 1
+                product = i*multi
     return primes.count(True)
 
 # 55.206 Reverse Linked List ====================================== URL: https://leetcode.com/problems/reverse-linked-list/
