@@ -1115,17 +1115,18 @@ def countPrimes(n):
 
 # 55.206 Reverse Linked List ====================================== URL: https://leetcode.com/problems/reverse-linked-list/
 # Problem: Given the head of a single linked list, return the head of reversed of the linked list.
-# Description: Loop though linked list. Each iteration, only look at the [head] and [head.next]. Break the connection between
-#			   [head] and [head.next], prepend head into the reversed list, and set [head.next] to be the new [head]
+# Description: Maintain three pointers [prev], [cur] and [next]. [prev] is None initially, that will be the last element in
+#              reversed list. [cur] is the node that is reversed in each iteration by [cur.next] = [prev]. [next] is used 
+#              to holde refrence of next node that [cur] is moving to, since [cur.next] is reassigned, and oringinal [cur.next]
+#              is lost.
 # Time Complexity: O(n)
-def reverseList(head):
-	prev = None
-	while head:
-		cur = head
-		head = cur.next
-		cur.next = prev
-		prev = cur
-	return prev
+def reverseList(head: Optional[ListNode]) -> Optional[ListNode]:
+    prev, cur = None, head
+    while cur:
+        next = cur.next             # preserve [cur.next] before it is reassigned
+        cur.next = prev             # reverse [cur] and [prev]
+        prev, cur = cur, next       # [prev] and [cur] move forward
+    return prev
 # Description: Recursive
 # Time Complexity: O(n)
 def reverseList_2(head):
