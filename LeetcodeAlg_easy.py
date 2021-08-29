@@ -1144,15 +1144,15 @@ def _rec(head, prev):
 
 # 56.217 Contains Duplicate ==================================== URL: https://leetcode.com/problems/contains-duplicate/
 # Problem: Given a list of integers, find if the list contains any dulicated element. Return True, if contains duplicate, otherwise return False
-# Description: Sort the list, and iterate throught the list, check adjacent elements, if two elements are same then it contains duplicates
-# Time Complexity: O(nlogn)
-def containsDuplicate(nums):
-	if len(nums)<=1: return False
-	nums.sort()
-	for i in range(len(nums)-1):
-		if nums[i]==nums[i+1]:
-			return True
-	return False
+# Description: Use "Counter" to count occurence of each number, then iterate though values in [cnt] return Ture if a value is larger than 1.
+# Time Complexity: O(n)
+from collections import Counter
+def containsDuplicate(nums: List[int]) -> bool:
+    cnt = Counter(nums)             # count [nums]
+    for v in cnt.values():                
+        if v>=2:                        # find any value that is larger than 1 
+            return True
+    return False
 # Description: Use python set() function, if set(nums) and nums have same size, meaning no duplicates
 # Time Complexity: O(n), convertion from list to set is O(n) alg. (Set is hashtable internally)
 def containDuplicate(nums):
