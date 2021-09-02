@@ -14,6 +14,7 @@ class Node:
         self.left = left
         self.right = right
         self.next = next
+        
 # 1.2 Add Two Numbers ============================================================ https://leetcode.com/problems/add-two-numbers/
 # Problem: Given two non-empty linked list [l1], [l2]. Two linked lists represent two non-negative integers, where each digit is 
 #          stored as node in reverse order. Sum up both linked list and return the sum as a linked list.
@@ -1849,3 +1850,25 @@ def connect(self, root: 'Node') -> 'Node':
             prev = prev.next                # move [prev] horizontally to continue build current level
         prev = dummy.next               # move [prev] to the beginning of next level
     return root
+
+# 69.129 Sum Root to Leaf Numbers ==================================================== https://leetcode.com/problems/sum-root-to-leaf-numbers/
+# Problem: Given a [root] of binary tree, where nodes in the tree can only contain value from 0 to 9. Each path from root to leaf represents
+#          a number, where value of root is highest digit and value of leaf is the lowest digit. Ex, a path 1 -> 2 -> 3 represents number 123
+#          Return the total sum of all root-to-leaf path. A leaf node is a node without any child
+# Description: DFS, maintain [cur] as the current sum along the path. Each resursive call, [cur] is multiplied by 10 and added with [root.val],
+#              [cur] = [cur]*10+[root.val]. If [root.left] or [root.right] exists, DFS on [root.left] and [root.right] with updated [cur].
+#              When [root] is a leaf, aka, [root.left] and [root.right] are None. Add [cur] into [res], that [res] = [cur]*10+[root.val]. Return
+#              [res] at the end
+def sumNumbers(root: Optional[TreeNode]) -> int:
+    def helper(root, cur, res):
+        if not root.left and not root.right:            # hit leaf, add [cur] into [res]
+            res[0] += (cur*10)+root.val
+            return
+        # DFS on left and right child, [cur] is updated
+        if root.left:                                   
+            helper(root.left, cur*10+root.val, res)
+        if root.right:
+            helper(root.right, cur*10+root.val, res)
+    res = [0]               # [res] is a list, that is passed by reference
+    helper(root, 0, res)
+    return res[0]
