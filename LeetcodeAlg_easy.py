@@ -1162,14 +1162,15 @@ def containDuplicate(nums):
 # Prbolem: Given a list [nums] of integers and a integer [k], find if there exists two duplicated elements nums[i] and nums[j], and 
 #		   there indices i and j are differ at most k, j-i<=k.
 # Description: Use dictionary, where elements are keys and indices are values. Adding elements to dict if element is not in dict,
-#		       if an element is in dict, than compare the indices of new and old elements
+#		       if an element is in dict, than compare the current index and index of last occurance. Alway update [dic] with latest
+#              occurance index.
 # Time Complexiy: O(n)
 def containsNearbyDuplicate(nums, k):
 	dic = {}
 	for i, v in enumerate(nums):
 		if v in dic and i-dic[v]<=k:
 			return True
-		dic[v] = i
+		dic[v] = i                  # record the latest occurance of [v]
 	return False
 
 # 58.255 Implement Stack using Queues ===================================== URL: https://leetcode.com/problems/implement-stack-using-queues/
