@@ -1176,7 +1176,9 @@ def containsNearbyDuplicate(nums, k):
 # 58.255 Implement Stack using Queues ===================================== URL: https://leetcode.com/problems/implement-stack-using-queues/
 # Problem: Implement a stack using queue, which should have functions including push(x), pop(), top(), empty(). And the queue will only have
 #		   following functions pushToEnd(), peek/popFront(), size(), isEmpty()
-# Description: Maintain a reversed queue, where the newly push element is at the front of queue. Then peek, pop performs the same as stack
+# Description: Maintain a reversed queue. When push elements, push new element to the end of queue, and rotate the queue len(queueu)-1 times,
+#              so that the newly added element is at the beginning of queue. Thus, pushing take O(n). And pop, top takes O(1) time, since
+#              the top of stack is at the beginning of queue
 # Time Complexity: push()=>O(n) pop()&top()&empty()=>O(1)
 class MyStack:
 
