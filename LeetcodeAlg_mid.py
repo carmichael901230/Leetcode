@@ -1872,3 +1872,37 @@ def sumNumbers(root: Optional[TreeNode]) -> int:
     res = [0]               # [res] is a list, that is passed by reference
     helper(root, 0, res)
     return res[0]
+
+# 70.130 Surrounded Regions ================================================================ https://leetcode.com/problems/surrounded-regions/
+# Problem: Given a m*n matrix [board] contains "X" and "O", capture regions of "O" that are 4-direction surrounded by "X", and "O" into "X"
+#          Surrounded regions should not be on the border, that "O"s on border is not converted to "X"
+#          Ex:
+#          X X X X          X X X X
+#          X O O X   ===>   X X X X 
+#          X X O X          X X X X
+#          X O X X          X O X X
+# Description: If a "O" is no connect with border, it need to be converted. Use DFS to find the "O" on border and convert it to a temporary 
+#              character. Then iterate through [board] convert remaining "O"s to "X", since they are not connected to boarder.
+# Time complexity: O(n), n = m*n
+def solve(board: List[List[str]]) -> None:
+    def dfs(row, col):
+        # convert "O" to "." if it is connected to border
+        if 0<=row<len(board) and 0<=col<len(board[row]) and board[row][col] == "O":
+            board[row][col] = "."
+            dfs(row+1, col)
+            dfs(row-1, col)
+            dfs(row, col+1)
+            dfs(row, col-1)
+            
+    for r in [0, len(board)-1]:         # dfs on first and last row
+        for c in range(len(board[r])):
+            dfs(r, c)
+    for r in range(len(board)):         # dfs on first and last column
+        for c in [0, len(board[r])-1]:
+            dfs(r, c)
+    for r in range(len(board)):         # convert remaining "O" to "X" and revert "." to "O"
+        for c in range(len(board[r])):
+            if board[r][c] == "O":
+                board[r][c] = "X"
+            elif board[r][c] == ".":
+                board[r][c] = "O"
