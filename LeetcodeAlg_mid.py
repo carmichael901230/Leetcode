@@ -1906,3 +1906,21 @@ def solve(board: List[List[str]]) -> None:
                 board[r][c] = "X"
             elif board[r][c] == ".":
                 board[r][c] = "O"
+
+# 71.131 Palindrome Partitioning =================================================== https://leetcode.com/problems/palindrome-partitioning/
+# Problem: Given a string [s], find all possible ways to partition the string, so that each substring is a palindrome.
+# Description: DFS backtracking. Backtrack through substring of [s], if s[:i] is a palindrome, then add s[:i] to [temp] list and continue
+#              backtracking on the rest of substring s[i:]. If not more character left in [s], add [temp] to [res] list. 
+#              To check palindrome, use s[:i] == s[:i][::-1]. 
+#              And [i] should start from 1 to len(s)+1, since s[:i] should start from s[:1]
+# Time complexity: O(2^n) worst case when all characters are same in [s]
+def partition(s: str) -> List[List[str]]:
+    def helper(s, temp, res):
+        if not s:
+            res.append(temp)
+        for i in range(1,len(s)+1):             # backtracking on every character from i=1 to i=len+1
+            if s[:i][::-1] == s[:i]:                    # check palindrome
+                helper(s[i:], temp+[s[:i]], res)        # append palindrome to [temp] then backtrack on rest of string
+    res =[]
+    helper(s, [], res)
+    return res
