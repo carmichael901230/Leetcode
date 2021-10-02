@@ -1181,7 +1181,6 @@ def containsNearbyDuplicate(nums, k):
 #              the top of stack is at the beginning of queue
 # Time Complexity: push()=>O(n) pop()&top()&empty()=>O(1)
 class MyStack:
-
 	def __init__(self):
 		self._queue = collections.deque()
 	def push(self, x: int) -> None:
@@ -1197,7 +1196,9 @@ class MyStack:
         
 # 59.226 Invert Binary Tree ============================================== URL: https://leetcode.com/problems/invert-binary-tree/
 # Problem: Given a root of binary tree. Invert the tree such that node.left <= node.right. Return the new root.
-# Description: DFS recursive traversal, node.left = invert(node.right) and node.right = invert(node.left)
+# Description: DFS recursive traversal, node.left = invert(node.right) and node.right = invert(node.left). If assign of [root.left]
+#              and [root.right] is not done in one line, need to save [root.left] to [temp] variable since it is overwritten by
+#              root.left = invertTree(root.right)
 # Time Complexity: O(n)
 def invertTree(root):
 	if root:	# no need to have else, since function return None by default
@@ -1217,8 +1218,8 @@ def isPowerOfTwo(n):
 		cur *= 2
 	return False
 # Description: Binary operator, numbers that are power of 2, must only has one 1 in its binary base, 1=1, 2=10, 4=100 ...
-#			   And if n is power of 2, n-1 must be the complement of n in bianry, 4=100 and 4-1=011, 8=1000 and 8-1=0111
-#			   So, if n is power of 2, n&n-1=0 is always true
+#			   And if [n] is power of 2, [n-1] must be the complement of n in bianry, 4=100 and 4-1=011, 8=1000 and 8-1=0111
+#			   So, if [n] is power of 2, n&n-1=0 is always true
 # Time Complexity; O(1)
 def isPowerOfTwo_2(n):
 	return n>0 and not n&(n-1)
@@ -1256,18 +1257,22 @@ class MyQueue:
 # Description: Dividing the linked list into two halves by using slow and fast(2X faster) pointers, then reverse first half and 
 #			   compare with second half.
 # Time complexity: O(n)
-def isPalindrome_3(head):
-	rev = None		# end of reversed list
-	slow = fast = head
-	while fast and fast.next:		# if fast is at the end, slow is at the middle
-		fast = fast.next.next
-		rev, rev.next, slow = slow, rev, slow.next	# ***reverse list***
-	# handle odd number of nodes, make right part starts at one node to the right of middle node
-	if fast:
-		slow = slow.next		
-	while rev and rev.val == slow.val:
-		rev, slow = rev.next, slow.next
-	return not rev
+def isPalindrome(head: Optional[ListNode]) -> bool:
+    slow = fast = head
+    ret = None
+    while fast and fast.next:               # iterate nodes in first half
+        fast = fast.next.next
+        ret, slow.next, slow = slow, ret, slow.next     # reverse first half
+    # if [fast] it not None, there are odd number nodes in list. skip one before comparison
+    if fast:
+        slow = slow.next
+    # compare reversed half with seoncd half
+    while ret:
+        if ret.val != slow.val:
+            return False
+        ret = ret.next
+        slow = slow.next
+    return True
 
 # 63.235 Lowest Common Ancestor of a Binary Search Tree ====================== URL: https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-search-tree/
 # Problem: Given a binary search tree and two nodes of the tree, find the lowest common ancestor(LCA)
