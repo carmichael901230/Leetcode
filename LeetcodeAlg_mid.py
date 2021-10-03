@@ -14,6 +14,10 @@ class Node:
         self.left = left
         self.right = right
         self.next = next
+class GraphNode:
+    def __init__(self, val: int = 0, neighbors: 'List[Node]' = None) -> None:
+        self.val = val
+        self.neighbors = neighbors
         
 # 1.2 Add Two Numbers ============================================================ https://leetcode.com/problems/add-two-numbers/
 # Problem: Given two non-empty linked list [l1], [l2]. Two linked lists represent two non-negative integers, where each digit is 
@@ -1924,3 +1928,31 @@ def partition(s: str) -> List[List[str]]:
     res =[]
     helper(s, [], res)
     return res
+
+# 72.133 Clone graph ========================================================================= https://leetcode.com/problems/clone-graph/
+# Problem: Given a reference of a [node] in a connected graph. Deep copy the entire graph and return to cooresponding node of [node] in 
+#          copied graph. Definition of graph node is as follow
+#          class GraphNode:
+#               def __init__(self, val=0, neighbors=[]):
+#                   self.val = val
+#                   self.neighbors = []
+# Description: DFS. Maintain a dictionary that keys are node of original graph, and values are cloned node in new graph. While DFS through
+#              original graph, for every [neigh] of [node.neighbors]. If [neigh] is in dictionary, means [neigh] is already cloned, but
+#              still need to be appended to the cloned [node.neighbors]. If [neigh] is not in didctionary, then create a new node with same
+#              value and insert it to dictionary, and append it to the cloned [node.neighbors]. 
+#              Initally, dictionary contains the "root" [node] and its cloned node, and DFS from there
+# Time complexity: O(V+E) iterate through vertices and edges
+def cloneGraph(node: 'GraphNode') -> 'Node':
+    def helper(node: 'GraphNode', dic: dict):
+        for neigh in node.neighbors:
+            if neigh not in dic:                    # if [neigh] is not cloned
+                dic[neigh] = GraphNode(neigh.val)       # clone [neigh], and save it in dictionary
+                helper(neigh, dic)                      # DFS on [neigh]
+            dic[node].neighbors.append(dic[neigh])  # always connect cloned [neigh] with cloned [node]
+    
+    if not node:
+        return None
+    dic = {node: GraphNode(node.val)}   # initially start with [node]
+    helper(node, dic)
+    return dic[node]                # return cloned [node]
+
