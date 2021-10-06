@@ -1274,12 +1274,13 @@ def isPalindrome(head: Optional[ListNode]) -> bool:
         slow = slow.next
     return True
 
-# 63.235 Lowest Common Ancestor of a Binary Search Tree ====================== URL: https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-search-tree/
+# 63.235 Lowest Common Ancestor of a Binary Search Tree ============= URL: https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-search-tree/
 # Problem: Given a binary search tree and two nodes of the tree, find the lowest common ancestor(LCA)
 #		   LCA is “The lowest common ancestor is defined between two nodes p and q as the lowest node in T that has both p and q as descendants 
 #          (where we allow a node to be a descendant of itself).”
 # Description: Start from root of BST, compare root.val with p.val and q.val. If both p and q.val<root.val, keep search on left branch,
-#              if both q and p.val>root.val, keep search on right branch, else current root is LCA.
+#              if both q and p.val>root.val, keep search on right branch, when one of them is less, and the other is greater than [root.val],
+#              means [root] split [q] and [p] then [root] is the LCA
 # Time complexity: O(logn), BST compare to node and ditch half of subtree
 def lowestCommonAncestor(root, p, q):
 	while root:
