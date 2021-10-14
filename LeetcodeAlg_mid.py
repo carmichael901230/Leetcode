@@ -1956,3 +1956,42 @@ def cloneGraph(node: 'GraphNode') -> 'Node':
     helper(node, dic)
     return dic[node]                # return cloned [node]
 
+# 73.134 Gas Station ========================================================================= https://leetcode.com/problems/gas-station/
+# Problem: Given two integer arrays [gas] and [cost], where elements in [gas] represent the amount of gas a car can refill at certain index
+#          [i] and elements in [cost] represent the amount of gas cost to move from current index [i] to next index [i+1]. Assume indeices 
+#          form a circle that the car can move from last index to first index. Find and return the starting index that the car has enough 
+#          gas to travel all indecies, return -1 if the car can't travel the circle
+# Description: The only way the the car can not travel the cirle is when total amount of gas is less than total cost sum(gas)<sum(cost).
+#              Check it and return -1, otherwise there always exists a starting index. 
+#              Greedy. traverse through [gas] and [cost] from index 0 to end, calculate the accumulate remaining gas at each index. Find 
+#              the index with lowest remaining gas, the index next to the lowest is the answer. 
+# Time complexity: O(n)
+def canCompleteCircuit(gas, cost):
+    if sum(gas)<sum(cost):
+        return -1
+    remain, index, lowest = 0, 0, float('inf')
+    for i in range(len(gas)):           # search for index with lowest [remain]
+        remain += gas[i]-cost[i]
+        if lowest >= remain:
+            lowest, index = remain, i
+    return (index+1)%len(gas)           # return the next index of [lowest]
+
+# 74.137 Single Number II ===================================================================== https://leetcode.com/problems/single-number-ii/
+# Problem: Given a list of integer [nums], where every element appear three times except for one element only appear once. Find and return the 
+#          single number in O(n) time complexity and use O(1) space
+# Description: Bitwise solution. If a number appear three times, for each bit of these number, they must sum up to either 3 or 0. Thus, sum up 
+#              all numbers in [nums] and modulo 3, the remaining must be the bit of the single number. Do the same from bit 0 to 32, we have
+#              the bitwise of the single number. 
+#              In case the single number is negative (2's complement), if the [res] is larger than (1<<31), [res] is negative. Use [res]-(1<<32)
+#              to get 2's complement of [res]
+# Time complexity: O(n)
+# Space complexity: O(1)
+def singleNumber(nums: List[int]) -> int:
+    res = 0
+    for i in range(32):
+        cnt = 0
+        for n in nums:
+            if n & (1<<i) == (1<<i):            # increate [cnt] if [i]th bit of [n] is 1
+                cnt += 1
+        res |= (cnt%3)<<i                       # extract the single bit
+    return res if res<(1<<31) else res-(1<<32)      # check negativity before returning
