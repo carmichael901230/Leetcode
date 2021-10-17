@@ -1299,21 +1299,32 @@ def lowestCommonAncestor_2(root, p, q):
 
 # 64.242 Valid Anagram ================================================== URL: https://leetcode.com/problems/valid-anagram/
 # Problem: Given two strings s and t, check if they are anagrams(same characters with different orders)
-# Description: Covert two strings into two dictionaries where key is character and value is count of each char,
-#			   then compare two dictionaries.
+# Description: Maintain dictionary [cnt]. Iterate [s] and add count of characters in [s], then iterate [t] subtract count
+#              of characters in [t]. If a character presents in [t] but not in [s], return False. After iterating [s] and
+#              [t], check values in [cnt] are all zero
 # Time complexity: O(n)
-def isAnagram(s, t):
-	dict_s, dict_t = {}, {}
-	for c in s:
-		dict_s[c] = dict_s.get(c, 0)+1		# get the value of dict[c], if doesn't exist then return 0(2nd arg)
-	for c in t:
-		dict_t[c] = dict_t.get(c, 0)+1 
-	return dict_s == dict_t
+def isAnagram(s: str, t: str) -> bool:
+    cnt = {}
+    for c in s:                     # add count of [s]
+        if c not in cnt:
+            cnt[c] = 1
+        else:
+            cnt[c] += 1
+    for c in t:                     # subtract count of [t]
+        if c not in cnt:
+            return False
+        else:
+            cnt[c] -= 1     
+    for k, v in cnt.items():        # check values in [cnt] are all zero
+        if v != 0:
+            return False
+    return True
 	
 # 65.257 Binary Tree Paths ================================================ URL: https://leetcode.com/problems/binary-tree-paths/
 # Problem: Given a binary tree, return a list of all the pathes from root to every leaf.
 #		   The list should follow format ['root->node1->node2->leaf1', 'root->node1->leaf2']
-# Description: Recursively depth first search where the rec function keep tracking current path, and the collection of root-to-leaf path
+# Description: Recursively depth first search where the rec function keep tracking current path, adding non-leaf nodes to the end
+#              of [curPath]. If a node has neither left or right child, it is a leaf node, append [curPath] to [collect]
 # Time complexity: O(n)
 def binaryTreePaths(root):
 	if not root:
@@ -1323,7 +1334,7 @@ def binaryTreePaths(root):
 	return result
 
 def binaryTreePaths_helper(root, collect, curPath):
-	if not root.left and not root.right:		# it is a leaf => add leaf to cur path
+	if not root.left and not root.right:		# it is a leaf => add leaf to cur path and add [curPath] to [collect]
 		collect.append(curPath+str(root.val))
 	if root.left:								# existing left child => add this node to path and keep tracking left branch
 		binaryTreePaths_helper(root.left, collect, curPath+str(root.val)+"->")
@@ -1368,7 +1379,7 @@ def addDigits(num):
 def isUgly(num):
 	if num<=0: return False
 	for x in [5, 3, 2]:
-		while num%x == 0:
+		while num%x == 0:          # extract 5,3,2 from [num]
 			num /= x
 	return num == 1
 
@@ -1384,16 +1395,16 @@ def missingNumber(nums):
 # 69.283 Move Zeros ====================================================== URL: https://leetcode.com/problems/move-zeroes/
 # Problem: Given an array of intergers, move all zero to the right side of array and maintain the order of non-zero elements.
 #		   Must do it in-place, and minimize the total number of operaions.
-# Description: Use two pointers [i] [j],  let both of them start at index 0, where [i] tracks the first zero need to be swapped
-#		       [j] tracks the head of un-processed array. So, if encounter non-zero, [i] and [j] increase at same pace.
-#			   If encounter zero, [i] will track this zero, and [j] goes on to find a non-zero to swap.
+# Description: Use two pointers [zero] and [nonZero] where [zero] looks for zero elements and [nonZero] looks for non-zero 
+#              elements, both of them start from index 0. If [zero] encounter a zero, increase [nonZero] to find a non-zero
+#              to swap. If [zero] encount a non-zero, increase [zero]. Always increase [nonZero] in every iteration
 # Time Complexity: O(n)
 def moveZeros(nums):
-	i = 0
-	for j in range(len(nums)):		# if no zero is found, [i] and [j] increase at same pace
-		if nums[j] != 0:			# if found zero, [i] is not increased, and [j] keep increasing, to find next non-zero
-			nums[i], nums[j] = nums[j], nums[i]		# when non-zero if found, then swap [i] [j]
-			i += 1					# increase [i] to find next zero
+	zero = 0
+	for nonZero in range(len(nums)):		# if no zero is found, [zero] and [nonZero] increase at same pace
+		if nums[nonZero] != 0:			# if found zero, [zero] is not increased, and [nonZero] keep increasing, to find next non-zero
+			nums[zero], nums[nonZero] = nums[nonZero], nums[zero]		# when non-zero if found, then swap
+			zero += 1					# increase [zero] to find next zero
 
 # 70.290 Word Pattern ==================================================== URL: https://leetcode.com/problems/word-pattern/
 # Problem: Given a pattern and a string, find if str and pattern are matched up one to one. Meaning a char in pattern matches a 
@@ -1420,7 +1431,7 @@ def wordPattern_2(pattern, str):
 	return True
 
 # 71.292 Nim Game ============================================================= URL: https://leetcode.com/problems/nim-game/
-# Problem: You paly Nim game with another player, there is a pile of cards with n cards in it, you and your oppponent take turns to move
+# Problem: You play Nim game with another player, there is a pile of cards with n cards in it, you and your oppponent take turns to move
 #	       1-3 cards out of the pile, who move the last cards win the game. Write a function that determines if you can win the game with 
 #		   n cards in the pile and you make the first move. Ex: n = 4, you can never win the game because no matter you take 1, 2 or 3 cards the opponent always takes 
 #          the last card.
@@ -1439,7 +1450,7 @@ def canWinNim(n):
 # Description: Create a sumArr where sumArr[i] stores the sum of number from index 0 to index i-1. Therefore, sumArr[0] = 0 and 
 #			   sumRange(i, j) = sumArr[j+1] - sumArr[i]
 class NumArray:
-    def __init__(self, nums):
+    def __init__(self, nums):                       # calculate accumulate sum of [nums] during initialization
         if nums:
             self.sums = [0]
             for i in range(len(nums)):
@@ -1450,7 +1461,7 @@ class NumArray:
     def sumRange(self, i, j):
         return self.sums[j+1]-self.sums[i]
 
-# 73.443 String Compression
+# 73.443 String Compression ========================================================== https://leetcode.com/problems/string-compression/
 # Problem: Given an array of Character, compress it in-place. Every element of the array should be a character (not int) of length 1. 
 #          After you are done modifying the input array in-place, return the new length of the array.
 #          Ex: ["a","b","b","b","b","b","b","b","b","b","b","b","b"] => ["a", "b", "1", "2"] return 4.
@@ -1472,7 +1483,7 @@ def compress(chars):
             i = j
     return k
 
-# 74.447 Number of Boomeranges
+# 74.447 Number of Boomeranges ======================================================https://leetcode.com/problems/number-of-boomerangs/
 # Problem: For any three points (i, j, k), if the distance between i and j equals to distance between i and k, we say (i, j, k) are "boomerang".
 #          Order of i, j, k matters, meaning (i, j, k) and (i, k, j) are two different boomerangs.
 #          Given n points in 2-d tuple ((x1, y1), (x2, y2), ...), return number of boomerangs.
@@ -1484,15 +1495,15 @@ def compress(chars):
 # Space complexity: O(n)
 def numberOfBoomeranges(points):
     cnt = 0
-    for p in points:
-        dic = {}                # dictionary {distance: count}
-        for q in points:
+    for p in points:            # [p] as the center point
+        dic = {}                    # key: distance between [p] and [q], value: number of [q]s that has the distance
+        for q in points:                # calculate distance between [p] and [q]
             d1 = p[0]-q[0]
             d2 = p[1]-q[1]
-            d = d1**2 + d2**2               # calculate distance between [p] and [q]
+            d = d1**2 + d2**2               
             dic[d] = 1 + dic.get(d, 0)      # tracking distance and number of points share the distance
         for k in dic:
-            cnt += dic[k] * (dic[k]-1)      # permutation and add to result
+            cnt += dic[k] * (dic[k]-1)      # calculate number of permutations of [pq] that have same distance
     return cnt
 
 # 75.448 Find All Numbers Disappeared in an Array
