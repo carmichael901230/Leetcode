@@ -1506,19 +1506,25 @@ def numberOfBoomeranges(points):
             cnt += dic[k] * (dic[k]-1)      # calculate number of permutations of [pq] that have same distance
     return cnt
 
-# 75.448 Find All Numbers Disappeared in an Array
+# 75.448 Find All Numbers Disappeared in an Array ============== https://leetcode.com/problems/find-all-duplicates-in-an-array/
 # Problem: Given an array of [n] integers, where 1<=arr[i]<=n, some elements appeared twice and some didn't appear
 #          Find all elements of [1,n] that didn't appear in the array
 # Description: If a number [num] appeared in the array, negate the element arr[num-1], do arr[num-1] = -1*abs(arr[num-1]).
-#              Then if a number appeared at least once, the element at its corresponding index (num-1) is turned into negative number
-#              After all, search for positive numbers in the array, which are the numbers that didn't appear
-def findDisappearedNumbers(nums):
-    for i in range(len(nums)):
-        index = abs(nums[i])-1                      # get corresponding index of num 
-        nums[index] = -1*abs(nums[index])           # negate number at index
-    return [i+1 for i in range(len(nums)) if nums[i]>0]
+#              Then if a number appeared at least once, the element at its corresponding index (num-1) is turned into negative number.
+#              If arr[num-1] is already neagative, means [num] appeared more than once, then add [num] to result array [res]
+# Time Complexity: O(n)
+# Space Complexity: O(1)
+def findDuplicates(nums: List[int]) -> List[int]:
+    res = []
+    for num in nums:
+        index = abs(num)-1
+        if nums[index] > 0:         # if num is not seen, mark its corresponding index as negative
+            nums[index] *= -1
+        else:                       # if num is seen, append it to [res]
+            res.append(index+1)
+    return res
 
-# 76.453 Minimum Moves to Equal Array Elements
+# 76.453 Minimum Moves to Equal Array Elements =============== https://leetcode.com/problems/minimum-moves-to-equal-array-elements/
 # Problem: Given a non-empty integer array of size n, find the minimum number of moves required to make all array elements equal, 
 #          where a move is incrementing n - 1 elements by 1.
 # Desciprtion: Say before increment, the sum of all numbers is [sum] and minimum element is [min]. After [m] moves, all elements are equal to [x]. 
@@ -1526,27 +1532,32 @@ def findDisappearedNumbers(nums):
 #              it from [min] to [x]. Plus {x = min+m} into {sum+m*(n-1) = x*n} => {sum-min*n = m}, solve for [m]
 def minMoves(nums):
     return sum(nums)-min(nums)*len(nums)
+# Description: Adding 1 to (n-1) element is same as subtract 1 from an element. Therefore, the question becomes subracting 1 at a time, so that
+#              all elements are bought down to min(nums). So, just need to find the total differernce between min(nums) and each element
+def minMoves1(nums: List[int]):
+    minimum, res = min(nums, 0)
+    for n in nums:
+        res += n-minimum
+    return res
 
-# 77.455 Assign Cookies
+# 77.455 Assign Cookies ========================================================= https://leetcode.com/problems/assign-cookies/
 # Problem: Given two arrays [g] and [s], where every element in [g] represents what size of cookie can satisfy a child.
-#          And every element in [s] represents the size of each cookie. If a child is given a cookie that is greater or equal to its satisficaion size,
-#          we say this childe is satisfied. Return the maximum number of children can be satisfied
-# Description: Sort both array, use two pointers on both arrays. If the cookie is greater or equal to the satisfiction size of the child.
-#              assign the cookie to the child, and increase both pointer. Otherwise, increase the pointer of cookie to find a larger one
+#          And every element in [s] represents the size of each cookie. If a child is given a cookie that is greater or equal to its 
+#          satisficaion size, we say this childe is satisfied. Return the maximum number of children can be satisfied
+# Description: Sort both array in assending order. If the cookie is greater or equal to the satisfiction size of the child. Assign the
+#              cookie to the child, and increase both pointer. Otherwise, increase the pointer of cookie to find a larger one
 def findContentChildren(g, s):
     g.sort()
     s.sort()
     i = j = res = 0
     while (i<len(g) and j<len(s)):
-        if (g[i] <= s[j]):
+        if g[i] <= s[j]:          # a child is satisfied, assign cookie
             res += 1
             i += 1
-            j += 1
-        else:
-            j += 1
+        j += 1
     return res
 
-# 78.459 Repeated Substring Pattern
+# 78.459 Repeated Substring Pattern ================================= https://leetcode.com/problems/repeated-substring-pattern/
 # Problem: Given a non-empty String [s], check if this string is constructed by multiple copies of its substring. The given string is consist of 
 #          lowercase letters only.
 # Description: Take substring of length [i] where len(s)%i == 0, because length of substring must divide entire string.
