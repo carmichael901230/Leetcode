@@ -1995,3 +1995,20 @@ def singleNumber(nums: List[int]) -> int:
                 cnt += 1
         res |= (cnt%3)<<i                       # extract the single bit
     return res if res<(1<<31) else res-(1<<32)      # check negativity before returning
+
+# 75.139 Word break ================================================================================= https://leetcode.com/problems/word-break/
+# Problem: Given a string [s] and a list of string [wordDict]. Return True, if [s] can be segmented into one or more words from [wordDict] 
+#          without any remaining words, same word in [wordDict] can be used for multiple times. Return False, if [s] contains word that can not
+#          be segmented with [wordDict]
+# Description: Dynamic Programming. Maintain a boolean list [dp], that dp[i] represent s[0:i] can be segment into [wordDict]. Iterate through 
+#              index of [s]. And iterate [word] of [wordDict] in the inner loop. If [word] exists at the end of s[:i], word == s[i-len(word):i],
+#              while dp[i-len(word)] is True, meaning everything before occurence of [word] can be segmented. After iterate through [s], dp[-1]
+#              contains the result for whether [s] can be segmented or not
+# Time complexity: O(s*w) s=len(s) w=len(wordDict)
+def wordBreak(self, s: str, wordDict: List[str]) -> bool:
+    dp = [True]+[False]*len(s)          # dp contains len(s)+1 elements, where first element is always True as base case
+    for i in range(1, len(s)+1):            # iterate [i] from 1 to len(s)+1
+        for word in wordDict:
+            if word == s[i-len(word):i] and dp[i-len(word)]:    # [word] appear at end of s[:i], can segment before occurence of [word]
+                dp[i] = True
+    return dp[-1]
