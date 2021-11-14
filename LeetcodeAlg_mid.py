@@ -2012,3 +2012,34 @@ def wordBreak(self, s: str, wordDict: List[str]) -> bool:
             if word == s[i-len(word):i] and dp[i-len(word)]:    # [word] appear at end of s[:i], can segment before occurence of [word]
                 dp[i] = True
     return dp[-1]
+
+# 76.142 Linked List Cycle II ============================================================== https://leetcode.com/problems/linked-list-cycle-ii/
+# Problem: Given [head] if a linked list, may or may not contains a cycle. Find and return the node where the cycle begins, return None if no
+#          cycle found.
+# Description: Draw the linked list here with a cycle, if traverse the list with [slow] and [fast] pointers, they will meet at node [X]
+#                                     ______        
+#              head ------------- E /       \       [H] is distance between "head" and "E"
+#                                  |        |       [D] is distance between "E" and "X"
+#                                  \______ X        [L] is length of cycle
+#              When [fast] and [slow] meet at [X], [slow] traveled [H+D]. Since [fast] travels twice faster than [slow], [fast] traveled [2H+2D].
+#              [fast] may travel multiple laps in cycle, then [2H+2D = H + D + nL], where [n] is integer prepresent laps of cycle. Manipulate 
+#              equation by canceling [H] and [D], we habe [H+D = nL]. Conver it to [H = nL-D], meaning the distacne [E] and [X] is same as [H].
+#              If a node start from [head] and a node start from [X] and move at same pace, they will meet at [E], which is the starting point
+#              of cycle。
+#              First, need to find [X], and if [slow] and [fast] doesn't meet there is not cycle, return None. Once found [X], move two pointers
+#              from [head] and [X], and return the node where they meet
+# Time complexity: O(n)
+def detectCycle(head: ListNode) -> ListNode:
+    fast = slow = head
+    while fast and fast.next:       # use "while-else" to detact if cycle exist
+        fast = fast.next.next
+        slow = slow.next
+        if fast == slow:                # [X] is found, break loop
+            break
+    else:                           # fast is None at some point, no cycle detected
+        return None
+    fast, slow = head, slow         # start from [head] and [X], to find [E]
+    while fast != slow:
+        fast = fast.next
+        slow = slow.next
+    return slow
