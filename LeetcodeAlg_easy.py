@@ -1570,7 +1570,7 @@ def repeatedSubstringPattern(s):
             return True
     return False
         
-# 79.461 Hamming Distance
+# 79.461 Hamming Distance ==================================== https://leetcode.com/problems/hamming-distance/submissions/
 # Problem: Hamming Distance of two numbers is the number of positions at which the bits of two numbers are different, 
 #         x = 1   (0 0 0 1)  => hamming distance = 2
 #         y = 4   (0 1 0 0)
@@ -1594,25 +1594,23 @@ def hammingDistance(x, y):
 #          The grid is completely surrounded by water, and there is exactly one island (i.e., one or more connected land cells).
 #          The island doesn't have "lakes" (water inside that isn't connected to the water around the island). 
 #          One cell is a square with side length 1. The grid is rectangular or square. Determine the perimeter of the island.
-# Description: The preimeter is number of island * 4 sides subtract the inner sides, where islands connects.
-#              Hence, when we see a island, increase [preimeter] by 4, then check the neighbor of the island. Each neighbor
-#              decrease [preimeter] by 1 (inner side)
-def islandPerimeter(grid):
-    res = 0
-    row, col = len(grid), len(grid[0])
-    for i in range(row):
-        for j in range(col):
-            res += grid[i][j]*4             # see an island, increase by 4
-            # check neighbors
-            if i > 0:               # left neighbor
-                res -= grid[i][j]*grid[i-1][j]
-            if i < row-1:           # right neighbor
-                res -= grid[i][j]*grid[i+1][j]
-            if j > 0:               # top neighbor
-                res -= grid[i][j]*grid[i][j-1]
-            if j < col-1:           # bottom neighbor
-                res -= grid[i][j]*grid[i][j+1]
-    return res
+# Description: Iterate [grid] to find land. Check four neighbors of each land, if a neighbor is water add 1 to [result], since 
+#              there is a valid line between current land and its neighbor
+# Time complexity: O(N)
+def islandPerimeter(grid: List[List[int]]) -> int:
+    cnt = 0
+    for i in range(len(grid)):
+        for j in range(len(grid[0])):
+            if grid[i][j] == 1:                             # find a land
+                if i == 0 or grid[i-1][j] == 0:                 # check up neighbor
+                    cnt += 1
+                if i == len(grid)-1 or grid[i+1][j] == 0:       # check bottom neighbor
+                    cnt += 1
+                if j == 0 or grid[i][j-1] == 0:                 # check left neighbor
+                    cnt += 1
+                if j == len(grid[i])-1 or grid[i][j+1] == 0:    # check right neighbor
+                    cnt += 1
+    return cnt
 
 # 81.475 Heaters
 # Problem: Given houses and heaters in two integer arrays separately, where values represents the location of houses and heaters
