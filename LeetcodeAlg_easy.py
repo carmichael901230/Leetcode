@@ -1621,36 +1621,34 @@ def islandPerimeter(grid: List[List[int]]) -> int:
 # Time Complexity: O(mlogn)
 #                  m - size of houses
 #                  n - size of heaters
-import sys
 import bisect
-def findRadius(houses, heaters):
-    heaters.sort()                  # sort heaters for binary search
-    radius = -sys.maxsize-1         # result radius, initially max_int
-    for h in houses:
-        index = bisect.bisect_left(heaters, h)      # binary search on [heaters] find the index, in order to get cloest heaters
-        distLeft = distRight = sys.maxsize          # distance to left and right closest heaters
-
-        if index > 0:
-            distLeft = h - heaters[index-1]         # distance to left cloest heater
-        if index < len(heaters):
-            distRight = heaters[index] - h          # distance to right cloest heater
-        radius = max(radius, min(distLeft, distRight))      # find min(left, right) and update radius if new radius is larger
-    return radius
+def findRadius(houses: List[int], heaters: List[int]) -> int:
+    heaters = sorted(heaters)
+    res = -float("inf")
+    for house in houses:
+        i = bisect.bisect_left(heaters, house)      # find [house] index in [heaters], to get closest heaters around [house]
+        left = right = float('inf')
+        if i>0:                                 # exists heater on left-side of [i], find the distance
+            left = house-heaters[i-1]       
+        if i<len(heaters):                      # exists heaters on right-side of [i], find the distance
+            right = heaters[i]-house
+        res = max(res, min(left, right))        # calculate minimum radius, needed for current [house]
+    return res
     
 # 82.476 Number Complement
 # Problem: Given a positive integer [num], output its complement number. The complement strategy is to flip the bits of its binary representation.
 #          EX: 5 = 101, its complement is 010 = 2
 #          The given integer [num] is guaranteed to fit within the range of a 32-bit signed integer. [num] >= 1
-# Description: Construct an other number [sum], which has same length of [bin(num)] and digits of [sum] are "1"s
-#              Use XOR on [sum] and [num] to get the complement
+# Description: Construct an other number [mask], which has same length of [bin(num)] and digits of [mask] are "1"s
+#              Use XOR on [mask] and [num] to get the complement
 # Time Complexity: O(logn)
 def findComplement(num):
-    temp, sum = num, 0
+    temp, mask = num, 0
     while temp > 0:                 # construct [sum] by shifting bits to left, and adding 1 at the right side
         temp >>= 1
-        sum <<= 1 
-        sum += 1
-    return num^sum                  # XOR on [num] and [sum]
+        mask <<= 1 
+        mask += 1
+    return num^mask                  # XOR on [num] and [sum]
 
 # 83.482 License Key Formatting
 # Problem: given a license key represented as a string S which consists only alphanumeric character and dashes.
