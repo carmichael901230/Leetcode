@@ -2043,3 +2043,66 @@ def detectCycle(head: ListNode) -> ListNode:
         fast = fast.next
         slow = slow.next
     return slow
+
+# 77.143 Reorder List ============================================================================== https://leetcode.com/problems/reorder-list/
+# Problem: Given [head] of singly linked-list. The nodes of list is l1->l2->l3 ... ->ln-1->ln. Reorder the list to be l1->ln->l2->ln-1->l3-> ... 
+#          The reorder should be done in-place
+# Description: The reordered list consists of in-ordered first half linked list and reversed second half linked list. Therefore, we can find the
+#              middle of linked list with [fast] and [slow] pointers. Then reverse second half with three pointers [prev], [cur] and [next]. Lastly 
+#              merge two halves together
+# Time complexity: O(n)
+def reorderList(head: Optional[ListNode]) -> None:
+    # find middle
+    fast = slow = head
+    while fast and fast.next:
+        slow = slow.next
+        fast = fast.next.next
+    # reverse second half
+    prev, cur = None, slow.next
+    while cur:
+        nextt = cur.next
+        cur.next = prev
+        prev = cur
+        cur = nextt
+    slow.next = None            # first node in second half, become tail
+    # merge together
+    head1, head2 = head, prev
+    while head2:                # [head1] and [head2] swtich the linked list they belong to
+        head1.next, head1, head2 = head2, head2, head1.next
+
+# 78.146 LRU Cache =============================================================================== https://leetcode.com/problems/lru-cache/
+# Problem: Design a data structure Least Recently Used cache (LRUcache), that 
+#          "LRUCache(int capacity)"" initialize LRU cache with positive size [capacity]. 
+#          "get(int key)" return the value of [key], if [key] is not present return -1. 
+#          "put(int key, int value)", update/insert [key]-[value] pair. If adding [key]-[value] pair and [capacity] is exceeded, evit the
+#          least recently used key, then add the new [key]-[value] pair
+# Description: OrderedDict, which is a dictionary with items track in order. "dict.move_to_end(key, last=True)" moves key to end of order
+#              "dict.popitem(key, last=True)" remove and return the last key in order. Maintain a OrderedDict [data], where least recently 
+#              used key is at the beginning of dict. Maintain [remain] track remaining slot in list. When adding an item, add it to end of
+#              [data], and reduce [remain]. When getting an item, move the [key] to end of [data]
+# Time Complexity: average O(1)   
+from collections import OrderedDict
+class LRUCache:
+    def __init__(self, capacity: int):
+        self.data = OrderedDict()
+        self.remain = capacity
+    
+    def get(self, key: int) -> int:
+        if key in self.data:
+            self.data.move_to_end(key, last=True)           # move accessed [key] to end
+            return self.data[key]
+        return -1
+
+    def put(self, key: int, value: int) -> None:
+        if key in self.data:                        # update a [key]
+            self.data[key]=value
+            self.data.move_to_end(key, last=True)
+        else:                                       # insert a new [key]
+            if self.remain > 0:                         # enough space
+                self.data[key]=value
+                self.remain -= 1
+            else:                                       # no space, remove least recently used [key] then add 
+                self.data.popitem(last=False)
+                self.data[key]=value
+
+# 
