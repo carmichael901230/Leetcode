@@ -125,7 +125,7 @@ def convert(s: str, numRows: int) -> str:
 #              negative or positive sign. Iterate through characters in [s]. If a char is number "isnumeric()", add it to [res]. If a 
 #              char is not number, and it is '-' or '+' at index 0, then change [sign] accordingly. If the char is not at index 0, 
 #              then stop iteration. Compare [res] with "-2**31" and "2**31-1" and return accordingly
-def myAtoi(self, s: str) -> int:
+def myAtoi(s: str) -> int:
     if len(s)<=0:
         return 0
     s = s.strip()           # strip leading and tailing spaces
@@ -383,13 +383,13 @@ def fourSum_2(nums: List[int], target: int) -> List[List[int]]:
 # Time complexity: O(n)
 def removeNthFromEnd(head: ListNode, n: int) -> ListNode:
     dummy = ListNode(0, head)
-    fast = slow = dummy
-    for _ in range(n):
+    fast = slow = dummy             # use [slow] and [fast], to find the node before the node to be removed
+    for _ in range(n+1):
         fast = fast.next
     while fast.next:
         slow = slow.next
         fast = fast.next
-    slow.next = slow.next.next
+    slow.next = slow.next.next      # remove target node
     return dummy.next
 
 # 13.22 Generate Parentheses =========================================================== https://leetcode.com/problems/generate-parentheses/
@@ -446,7 +446,7 @@ def swapPairs(head: ListNode) -> ListNode:
 #              [divisor] by "divisor<<=1" to reduce number of iterations. Also, since [divisor] is douled, [cnt] shoule be doubled every 
 #              iteration by "cnt<<=1", because double amount of [divisor] is subtracted. At the end of loop, add "sign" to [res], and compare
 #              [res] with boundary then return 
-# Time complexity: O(log(dividend, divisor)^2), outter and innter loop both O(log(dividend, divisor))
+# Time complexity: O(log(dividend, divisor)), outter and innter loop both O(log(dividend, divisor))
 def divide(dividend: int, divisor: int) -> int:
     positive = (dividend < 0) == (divisor < 0)          # extract sign of result
     dividend, divisor = abs(dividend), abs(divisor)
@@ -625,40 +625,41 @@ def combinationSum_2(candidates: List[int], target: int) -> List[List[int]]:
 #              skip dupliate elements if "candidates[i]==candidates[i-1]". Deduct [target] when "candidates[i]" is added to a combination. If
 #              [target]==0, the sum is reached and add current combination to result. If target<0, the sum is exceeded and return to stop 
 #              recursion. 
+# Time complexity: O(2**n) [n] is size of [candidates]. The total number of subsets of [candidates]
 def combinationSum2(candidates: List[int], target: int) -> List[List[int]]:
+    def helper(pool, temp, target, res):
+        if target<0:
+            return
+        elif target == 0:
+            res.append(temp)
+            return
+        for i in range(len(pool)):
+            if i>0 and pool[i] == pool[i-1]:
+                continue
+            helper(pool[i+1:], temp+[pool[i]], target-pool[i], res)
     res = []
-    combinationSum2_helper(sorted(candidates), 0, target, [], res)          # [candidates] must be sorted
+    helper(sorted(candidates), [], target, res)
     return res
-
-def combinationSum2_helper(pool: List[int], start: int, target: int, comb: List[int], res: List[int]):
-    if target==0:               # find a combination sum up to [target]
-        res.append(comb)
-        return
-    if target>0:                # combination exceeded [target]
-        return
-    for i in range(start, len(pool)):
-        if start!=i and pool[i]==pool[i-1]:
-            continue
-        if pool[i]>target: break            # early ternimation
-        combinationSum2_helper(pool, start+1, target-pool[i], comb+[pool[i]], res)
 
 # 22.43 Multiply Strings ==================================================================== https://leetcode.com/problems/multiply-strings/
 # Problem: Given two non-negative integer strings [num1] and [num2]. return the product of them as string.
-# Description: Maintain a integer list [res] has same length of total length of [num1] and [num2], all elements in [res] are "0" initially.
-#              Iterate [num1] and [num2] reversely in nested loop, because multiplication is done by multiplying a digit in [num1] with 
-#              every digit in [num2]. Track index of [num1] and [num2] while multiplying to maintain index of [res] to store the "produect"
-#              and "carry". After looping, truncate leading "0", and return reversed [res] with every element casted to string
+# Description: Multiplication is done by multiplying a digit in [num1] with every digit in [num2]. Maintain [res] as result, iterate digits
+#              in [num1] and [num2] in reversed order. Multiple each digit from [num1] is multiplied with every digit in [num2], and maintain
+#              [multi1] and [mulit2] to represent digital position. Production of each multiplication is added to [res]
 # Time complexity: O(n*m), n=len(num1) m=len(num2)
 def multiply(num1: str, num2: str) -> str:
-    res = [0]* (len(num1) + len(num2))          # initial [res] with all "0"s
-    for i, e1 in enumerate(reversed(num1)):
-        for j, e2 in enumerate(reversed(num2)):
-            res[i+j] += (ord(e1)-48) * (ord(e2)-48)           # convert string to int, and get product
-            res[i+j+1] += res[i+j]//10                      # add carry to next digit
-            res[i+j] %= 10                                  # get number for current digit
+    def strToInt(char):                 # function to convert each digit to int
+        return ord(char)-ord("0")
 
-    while len(res) > 1 and res[-1] == 0: res.pop()          # truncate leading "0"
-    return ''.join( map(str,res[::-1]) )                    # use "map(str, iterable)" to cast element to string
+    res = 0
+    multi1 = 1                          # represent digital position of [n1]
+    for n1 in reversed(num1):
+        multi2 = 1                          # represent digital position of [n2]
+        for n2 in reversed(num2):
+            res += strToInt(n1)*strToInt(n2)*multi1*multi2
+            multi2*=10
+        multi1*=10
+    return str(res)
 
 # 23.45 Jump Game II =========================================================================== https://leetcode.com/problems/jump-game-ii/
 # Problem: Given a list of non-negative integers [nums], each element represent how many index you can jump from that location. For example,
@@ -791,7 +792,7 @@ def myPow_helper(x, n):
 #              [7, 8, 9]]   
 # Description: Define four boundaries [top], [bottom], [left], [right]. Bring down [top] by 1, after traversing a row on top. Move [right] to 
 # #            left by 1, after traversing a column on right side. Raise up [bottom] by 1, after traversing a row at bottom. Move [left] to 
-#              right by 1, after traversing a column on left side. When traversing a row, traverse elements between [left] and [right], when
+#              right by 1, after traversFing a column on left side. When traversing a row, traverse elements between [left] and [right], when
 #              traversing a column, traverse elements between [top] to [bottom]. Check if boundary overlap after traversing a row or column, 
 #              exit loop if any boundaries overlaps each other
 # Time complexity: O(n*m)
@@ -853,7 +854,7 @@ def merge(intervals: List[List[int]]) -> List[List[int]]:
     return res
 
 # 32.57 Insert Interval ========================================================================= https://leetcode.com/problems/insert-interval/
-# Problem: Given a set of non-overlapping [intervals], insert a new interval [neInterval], merge overlap after inserting if any.
+# Problem: Given a set of non-overlapping [intervals], insert a new interval [newInterval], merge overlap after inserting if any.
 #          The given [intervals] is sorted initially in ascending order by their "starting"
 # Descrption: If [newInterval] overlaps with elements in [intervals], there must exist that "newInterval[0] <= intervals[i][1]", where 
 #             [newInterval] starts from "intervals[i]". Or there must exist that "newInterval[1] < intervals[j][0]", where [newInterval]
@@ -863,13 +864,13 @@ def merge(intervals: List[List[int]]) -> List[List[int]]:
 #             [merged] with the rest of [intervals] and return
 # Time complexity: O(N), N=len(intervals) combine [merged] with rest of [intervals] takes O(N)
 def insert(intervals, newInterval):
-    if len(intervals) == 0:                     # corner case
+    if len(intervals) == 0:                     # corner case, [intervals] is empty
         return [newInterval]
         
-    if newInterval[1] < intervals[0][0]:        # corner case
+    if newInterval[1] < intervals[0][0]:        # corner case, [newInterval] is smaller than every item in [intervals]
         return [newInterval] + intervals
     
-    if newInterval[0] > intervals[-1][1]:       # corner case
+    if newInterval[0] > intervals[-1][1]:       # corner case, [newInterval] is larger than every item in [intervals]
         return intervals + [newInterval]
     
     first = insert_helper(intervals, newInterval[0], True)          # find starting point of merge
@@ -947,26 +948,22 @@ def generateMatrix(n: int) -> List[List[int]]:
 # Description: Iterate though the list to get [size]. Get actual [rotates] need by [k%size]. Find the [rotates]th last element from end of list,
 #              Disconnect elements [rotates] and [rotates+1], make [rotates+1] the new [head], and connect [tail] element to old [head]
 # Time Complexity: O(N)
-def rotateRight(head: ListNode, k: int) -> ListNode:
+def rotateRight(head: Optional[ListNode], k: int) -> Optional[ListNode]:
     if not head:
         return None
-    size = 1
-    cur = head
-    while cur.next != None:                 # Record [size]
-        size += 1   
-        cur = cur.next
-    tail = cur
-    rotate = k%size                         # Get [rotate] from [k%size]
-    if rotate == 0:
-        return head
-    else:
-        tail.next = head                    # connect [tail] to old [head]
-        cur = head
-        for _ in range(size-rotate-1):      # find [rotate]th last element
-            cur = cur.next
-        head = cur.next                     # let [rotate+1] be the new head
-        cur.next = None                     
-        return head
+    lastElement = head
+    length = 1
+    while ( lastElement.next ):
+        lastElement = lastElement.next
+        length += 1
+    k = k % length
+    lastElement.next = head
+    tempNode = head
+    for _ in range( length - k - 1 ):
+        tempNode = tempNode.next
+    answer = tempNode.next
+    tempNode.next = None
+    return answer
 
 # 35.62 Unique Paths ====================================================================================== https://leetcode.com/problems/unique-paths/
 # Problem: Given a m*n grid, a robot starts from top-left corner. The robot can only move down or right, how many possible unqiue path to go to bottom
@@ -996,23 +993,26 @@ def uniquePaths_2(m: int, n: int) -> int:
 #           would there be
 # Description: Dynamic programming. Maintain a [m*n] matrix that each element dp[i][j] represent number of unique path to reach [i][j]. In order to 
 #              goto [i][j], the robot can move from [i][j-1] or from [i-1][j]. Thus, the value of [i][j] is the sum of [i-1][j] and [i][j-1]. However,
-#              if [i][j] is an obstacle, then there is no path, meaning [i][j] = 0.  Mutiply (1-obstacleGrid[i][j]) to test if [i][j] is obstacle
-#              The first row and first column should all be "1"s, unless obstacle, since there is only an unique path along first row and first column. 
-#              Return dp[-1][-1] at the end
+#              if [i][j] is an obstacle, then there is no path, meaning [i][j] = 0. Initially, first row and first column of [dp] are 1, since there
+#              is only one way to reach those cells. Unless there's a obstacle on the path, then cells after that obstacle are not reachable.
 # Time complexity: O(m*n)
 def uniquePathsWithObstacles(obstacleGrid: List[List[int]]) -> int: 
-    if obstacleGrid[0][0] == 1 or obstacleGrid[-1][-1] == 1:            # early terminate when start or end element is obstacle
-        return 0
-    obstacleGrid[0][0] = 1                                              # the top-left element is always 1 if it is not obstacle
-    for i in range(1, len(obstacleGrid)):                                   # set value for first row
-        obstacleGrid[i][0] = obstacleGrid[i-1][0]*(1-obstacleGrid[i][0])
-    for i in range(1, len(obstacleGrid[0])):                                # set value for first column
-        obstacleGrid[0][i] = obstacleGrid[0][i-1]*(1-obstacleGrid[0][i])
-
-    for i in range(1, len(obstacleGrid)):                # number of path of [i][j] is sum of [i-1][j] and [i][j-1], if [i][j] is not obstacle
-        for j in range(1, len(obstacleGrid[0])):            
-            obstacleGrid[i][j] = (obstacleGrid[i-1][j]+obstacleGrid[i][j-1]) * (1-obstacleGrid[i][j])
-    return obstacleGrid[-1][-1]
+    dp = [[0 for _ in obstacleGrid[i]] for i in range(len(obstacleGrid))]
+    for i in range(len(obstacleGrid)):      # initial value for first column
+        if obstacleGrid[i][0] == 1:
+            break
+        dp[i][0] = 1
+    for j in range(len(obstacleGrid[0])):   # intial value for first row
+        if obstacleGrid[0][j] == 1:
+            break
+        dp[0][j] = 1
+    for i in range(1, len(obstacleGrid)):           
+        for j in range(1, len(obstacleGrid[i])):
+            if obstacleGrid[i][j] == 1:
+                dp[i][j] = 0
+            else:
+                dp[i][j] = dp[i-1][j] + dp[i][j-1]
+    return dp[-1][-1]
 
 # 37.64 Minimum Path Sum ============================================================================ https://leetcode.com/problems/minimum-path-sum/
 # Problem: Given a [m*n] grid filled with non-negative integers, where each element of grid represent to cost to go through that cell. Find a path
@@ -1046,6 +1046,7 @@ def minPathSum(grid: List[List[int]]) -> int:
 #              if ".." pop last element from stack, if "." or empty string "", do nothing and move on to next, else append element to stack.
 #              The [stack] contains the "canonical path" as an array. Combine elements in array to a string with slash between each element, 
 #              and add one more slash at beginning. Return the constructed string
+# Time complexity: O(n)
 def simplifyPath(path: str) -> str:
     stack = []                  # maintain a stack to track directory history
     path = path.split("/")
@@ -1471,26 +1472,29 @@ def restoreIpAddresses_helper(pool, temp, res):
 # 54.95 Unique Binary Search Trees II ================================================ https://leetcode.com/problems/unique-binary-search-trees-ii/
 # Problem: Given an integer n, return all the structurally unique binary search tree, which contains nodes from 1 to n. Return the answer in any
 #          order
-# Description: DFS backtracking. Create a recursive helper function, that take [start] and [end] as the node value should be created within it.
+# Description: DFS backtracking. [start] and [end] are value boundary of a root, and take [i] at root. Then, [start, i) belongs to left tree, and
+#              (i, end] belongs to right tree. Recursively backtracking to create a list with all valid trees on both left and right, then connect
+#              them with root one by one and append to result list
+#              Create a recursive helper function, that take [start] and [end] as the node value should be created within it.
 #              Iterate [i] from [start] to [end], where [i] is the root of tree that contains node between [start] to [end]. According to BST
 #              property, left subtree of [i] contains nodes from [start] to [i-1], and right subtree contains nodes from [i+1] to [end]. Thus,
 #              recursively call helper function on (start, i-1) and (i+1, end). Both recursive call will return a list of nodes which are 
 #              all valid BS subtrees created. Connect all nodes returned from (start, i-1) as the left node of [i], and connect all nodes returned
 #              from (i+1, end) as the right node of [i]. Append node [i] to a list [res], which is returned and to be used by upper level.
-# Time complexity: TODO see Catalan Number
+# Time complexity: see Catalan Number
 def generateTrees(n: int) -> List[TreeNode]:
-    return generateTrees_helper(1, n+1)
-
-def generateTrees_helper(start, end):
-    if start==end:
-        return None
-    res = []
-    for i in range(start, end):                                     # take [i] as root of this level
-        for l in generateTrees_helper(start, i) or [None]:              # (start, i) are left subtree of [i]
-            for r in generateTrees_helper(i+1, end) or [None]:          # (i+1, end) are right subtree of [i]
-                node = TreeNode(i, l, r)                            # create node [i] and connect all possible left/right child to it
-                res.append(node)                                
-    return res                                                  # store [i] in [res] and return [res] to be used by upper level
+    def helper(left, right):
+        if left >= right:
+            return [None]
+        res = []
+        for i in range(left, right):
+            leftList = helper(left, i)                  # all valid subtrees on left
+            rightList = helper(i+1, right)              # all valid subtrees on right
+            for leftNode in leftList:
+                for rightNode in rightList:
+                    res.append(TreeNode(i, leftNode, rightNode))        # create a [root] and connect with each valid left and right combination,
+        return res
+    return helper(1, n+1)
 
 # 55.96 Unique Binary Search Trees ==================================================== https://leetcode.com/problems/unique-binary-search-trees/
 # Problem: Givne an integer [n], return the number of structually unique binary search trees which contains exactly nodes from 1 to [n].
@@ -1503,7 +1507,7 @@ def generateTrees_helper(start, end):
 #              G(n) = G(0)*G(n-1) + G(1)*G(n-2) + ... + G(n-2)*G(1) + G(n-1)*G(0). Use DP to record from G(0) to G(n), and return G(n) at the end
 # Time complexity: O(n^2) build [dp] of size n, each dp[i] need to iterate i times
 def numTrees(n: int) -> int:
-    dp = [0 for _ in range(n+1)]
+    dp = [0]*(n+1)
     dp[0], dp[1] = 1, 1                 # G(0) and G(1) both equals to 1, since zero node and 1 node both have one unique structual
     for i in range(2, n+1):                 # iterate [i] to build [dp]
         for j in range(i):                      # [j] represents pick [j] at root
@@ -2105,4 +2109,580 @@ class LRUCache:
                 self.data.popitem(last=False)
                 self.data[key]=value
 
-# 
+# 79.200 Number of islands ============================================================= https://leetcode.com/problems/number-of-islands/
+# Problem: Given a m*n matrix [grid], which represent land ("1") and water ("0"). Return the number of islands. 
+#          An island is surrounded by water and lands are connected by 4-way connection
+# Description: DFS. Iterate through every cell in [grid], once find a "1" increase island count [cnt] by 1, convert current "1" to "2",
+#              and recursively convert its 4 neighbors. 
+# Time complexity: O(n*m) every cell is accessed twice
+def numIslands(self, grid: List[List[str]]) -> int:
+    def flood(grid, i, j):
+        if grid[i][j] == "1":
+            grid[i][j] = "2"                # covert a land to "2"
+            if i>0:                         # and recursively invoke on its 4 neighbors
+                flood(grid, i-1, j)
+            if i<len(grid)-1:
+                flood(grid, i+1, j)
+            if j>0:
+                flood(grid, i, j-1)
+            if j<len(grid[i])-1:
+                flood(grid, i, j+1)
+    cnt = 0
+    for i in range(len(grid)):              # iterate every elements in [grid]
+        for j in range(len(grid[i])):
+            if grid[i][j] == "1":   
+                cnt += 1                        # find a new island
+                flood(grid, i, j)               # convert island recursively
+    return cnt
+
+# 80.532 K-diff pairs in an array =========================================== https://leetcode.com/problems/k-diff-pairs-in-an-array/
+# Problem: Given an integer array [nums] and an integer [k]. Return nunber of unique k-diff pairs in the array.
+#          K-diff pair is two numbers nums[i] and nums[i] that abs(nums[i]-nums[j]) = k
+# Desciption: For a number nums[i], find if nums[i]+k is also in the array. If k=0, then find numbers that appeared more than once,
+#             because same number is difference of zero
+# Time complexity: O(n)
+from collections import Counter
+def findPairs(nums: List[int], k: int) -> int:
+    cnt = Counter(nums)
+    if k == 0:
+        return sum([1 for val in cnt.values() if val>1])    # find same number, if k==0
+    res = 0
+    for key in cnt:
+        if key+k in cnt:           # find if nums[i]+k is in array
+            res += 1
+    return res
+
+# 81.148 Sort list ==================================================================== https://leetcode.com/problems/sort-list/
+# Problem: Given [head] of a single linked list, return the head of list after sorting in ascending order. 
+#          Do it in O(NlogN) time and use O(1) space
+# Description: Merge sort. Use [slow] and [fast] pointer to find middle of each list to partition, break [left] and [right] parts
+#              by letting last node of [left] partition poionts to None. Merge [left] and [right] into a list with [dummy] node 
+#              at beginning, and return [dummy.next]
+# Time complexisty: O(NlogN)
+def sortList(head: Optional[ListNode]) -> Optional[ListNode]:
+    def merge(left, right):
+        dummy = cur = ListNode(0)
+        while left and right:                       # merge [left] and [right]
+            if left.val<right.val:
+                cur.next = left
+                left, cur = left.next, cur.next
+            else:
+                cur.next = right
+                right, cur = right.next, cur.next
+        if left or right:                           # connect rest of nodes to result list
+            cur.next = left if left else right
+        return dummy.next
+    
+    if not head or not head.next:           # stop when there is only one node left
+        return head
+    prev, slow, fast = None, head, head               
+    while fast and fast.next:
+        prev, slow, fast = slow, slow.next, fast.next.next
+    prev.next = None                                # [prev] is last node of [left], break [left] and [right] 
+    left = sortList(head)           # recursively partition left part
+    right = sortList(slow)          # recursively partition right part
+    return merge(left, right)
+
+# 82.662 Maximum Width of Binary Tree ============================= https://leetcode.com/problems/maximum-width-of-binary-tree/
+# Problem: Given [root] of a binary tree, return the maximum width of the tree among all levels.
+#          Width of tree is the number of nodes (inclusive) between left-most and right-most node in a level, where null node
+#          are also counted into width calculation
+# Descrption: DFS with record. Denote [pos] is the postion of node at its level, where left most node has [pos]=0, and right
+#             most node has [pos]=2**(level-1). If a node at [pos], then its left child is at [pos*2] and right child at
+#             [pos*2+1] in the next level. Traverse through tree, and track min and max [pos] of each level in [record].
+#             Find and return the maximum difference between min and max among all level
+# Time complexity: O(N)
+def widthOfBinaryTree(root: Optional[TreeNode]) -> int:
+    def helper(node, level, pos, record):
+        if node:
+            if level not in record:
+                record[level] = (pos, pos)          # inital min and max at new level
+            else:
+                record[level] = (min(pos, record[level][0]), max(pos, record[level][1]))        # updating min and max of a level
+            helper(node.left, level+1, pos*2, record)           # left child at [pos*2]
+            helper(node.right, level+1, pos*2+1, record)        # right child at [pos*2+1]
+            
+    record = {}
+    helper(root, 0, 0, record)
+    return max([ele[1]-ele[0] for ele in record.values()])+1    # find max width of all level
+
+# 83.150 Evaluate Reverse Polish Notation =================== https://leetcode.com/problems/evaluate-reverse-polish-notation/
+# Problem: Given a array of string [tokens], representing Reverse Polish Notation. Evaluate the array and return the result of
+#          the notation. Valid operators are +, -, *, /. And the division should truncate towards zero.
+#          Reverse Polish Notation: two operends come before the operator
+#          Ex: [4, -13, 5, /, +] => 4+(-13/5) = 4-2 = 2
+# Description: Stack. Append operands to stack. When hit an operator, pop two operands, where right operand is popped first and
+#              left operand is popped later. 
+#              Note, division should truncate toards zero. Thus, division should use int(l/r), since l//r always round down
+# Time complexity: O(n)
+def evalRPN(tokens: List[str]) -> int:
+    stack = []
+    for ele in tokens:
+        if ele not in "+-*/":
+            stack.append(int(ele))              # append operands to stack
+        else:
+            r, l = stack.pop(), stack.pop()
+            if ele == "+":
+                stack.append(l+r)
+            elif ele == "-":
+                stack.append(l-r)
+            elif ele == "*":
+                stack.append(l*r)
+            elif ele == "/":
+                stack.append(int(l/r))      # division truncate towards zero      
+    return stack.pop()              # last element is result
+
+# 84.138 Copy List with Random Pointer ================================== https://leetcode.com/problems/copy-list-with-random-pointer/
+# Problem: Given the [head] of a linked list, where each node in the linked list contains an [random] pointer that points one of the
+#          node in the list or points to None. Make a "deep-copy" of original list and return the head of copied list
+# Description: Dictionary. Use Dictionary [pair] to maintain relation between original node and its corresponding copied node. First 
+#              iteration, copy each node and link copied nodes with [next] pointer, and add "origin: copied" mapping to [pair]. In
+#              second iteration, connect "copied" node with [random] pointer. Note, if "origin" node points to None, and [pair] does
+#              not contain "None", assign "copied" with None value specifically
+# Time complexity: O(n)
+def copyRandomList(head: 'Node') -> 'Node':
+    pair = {}
+    dummy = copied = Node(0)            # [copied] is tail of copied list
+    origin = head                       # [origin] is current node being copied
+    while origin:                           # link copied with [next] pointer
+        pair[origin] = Node(origin.val)
+        copied.next = pair[origin]
+        copied, origin = pair[origin], origin.next
+    for k, v in pair.items():               # link [random] pointer
+        v.random = pair[k.random] if k.random is not None else None     # if [origin] points to None, let [copied] points to None
+    return dummy.next 
+
+# 85.316 Remove Duplicate Letters ======================================= https://leetcode.com/problems/remove-duplicate-letters/
+# Problem: Given a string [s], remove duplicated characters without changing relative order of characters so that each character 
+#          appear only once. Return the result is the smallest in lexicographcial order among all possible results.
+#          Such as, "bacdcb" will return "acdb".
+# Description: Track three things, last index of each character, whether a character is added to result, and result [stack] which
+#              maintain character in minimum lexicographical order. Iterate through [s], and check following conditions.
+#              If a character [c] is not visited, and it is smaller than top of [stack], and top of [stack] has other occurance
+#              in later index. Then remove [top] from [stack] and [visited], and append [c] to top. For character [c] that is
+#              un-visited and larger than [top], alway append to [stack] and [visited]. 
+# Time Complexity: O(n)
+def removeDuplicateLetters(s: str) -> str:
+    lastOccur = {}
+    for i in range(len(s)):     # record last occurance of each character
+        lastOccur[s[i]] = i
+    stack, visited = [], set()
+    for i in range(len(s)):
+        if s[i] not in visited:
+            while stack and s[i]<stack[-1] and lastOccur[stack[-1]]>i:      # keep removing larger element
+                visited.remove(stack[-1])
+                stack.pop()
+            visited.add(s[i])                   # append un-visited and smaller character
+            stack.append(s[i])
+    return "".join(stack)
+
+# 86.946 Validate Stack Sequences ====================================== https://leetcode.com/problems/validate-stack-sequences/
+# Problem: Given tow integer lists [pushed] and [popped] of distinct value, where [pushed] and [popped] are permutation of each
+#          other. Check if this could have been the result of a sequence of push and pop operations on a stack. 
+#          Ex: pushed=[1,2,3,4,5] popped=[4,5,3,2,1]
+#              push 1, 2, 3, 4 => pop 4 => push 5 => pop 5, 3, 2, 1
+# Description: Perform actual push and pop operations. Iterate through [pushed], push elements to [stack]. And maintain [i] as
+#              index of [popped], as the next element need to be popped. Pop element from [stack] when popped[i] matches top
+#              of [stack]. At the end, [stack] must be empty, otherwise return False
+# Time complexity: O(n)
+def validateStackSequences(pushed: List[int], popped: List[int]) -> bool:
+    stack = []
+    i = 0                   # [i] track the next element need to be popped
+    for num in pushed:
+        stack.append(num)
+        while stack and stack[-1] == popped[i]:     # check if top matches popped[i]
+            stack.pop()
+            i += 1
+    return not stack
+
+# 87.1663 Smallest String With A Given Numeric Value ====== https://leetcode.com/problems/smallest-string-with-a-given-numeric-value/
+# Problem: Given two integers [n] and [k], return the lexicographically smallest string with length [n] and numeric value equal to [k].
+#          "Numeric value" is the value of a lowercase character, where 'a'=1 and 'z'=26
+#          A string [x] is "lexicographically smaller" than [y], that is, either [x] is prefix of [y], or index [i] is the first index
+#          that x[i] != y[i] and x[i] comes before y[i] in alphabetic order 
+# Descrption: Maintain array [res] of size [n], that represent numberic value of characters. Maintain [gap] as the gap between total
+#             numberic value and [k], [gap] is k-n initially. For an item of [res], if [gap] is larger than 25, then it should be
+#             set to 'z'. Add 25 to res[i] and decrease [gap] by 25. If [gap] is less than or equals to 25, then [gap] can be closed
+#             on current index [i]. Add [gap] to res[i] and return coorespanding string
+# Time complexity: O(n)
+def getSmallestString(n: int, k: int) -> str:
+    res = [1]*n
+    gap = k-n
+    for i in range(n):
+        if gap>25:                  # set [i] to 'z'
+            res[i] += 25
+            gap -= 25
+        else:                       # [gap] can be closed
+            res[i] += gap
+            break
+    return "".join([chr(ele-1+ord('a')) for ele in res[::-1]])      # return character from reversed [res]
+
+# 88.763 Partition Labels ======================================================== https://leetcode.com/problems/partition-labels/
+# Problem: Given a string [s]. Partition the string into as many parts as possible, so that each letter only appear in one partition
+#          Return a list of integers representing size of each partition from left to right
+# Description: Dictionary, maintain last index of each character. Use two pointers [left] and [right] track boundary of a partition.
+#              Iterate through [s], update [right] as last index of characters in current partition. If iteration reaches [right],
+#              means all letter encountered before, appear in this partition only. Thus, from [left] to [right] is a partition.
+#              Calculate the length and save in [res]. Set [left] to next index of [right] to start a new partition.
+# Time complexity: O(n)
+def partitionLabels(s: str) -> List[int]:
+    lastIndex = {c:i for i, c in enumerate(s)}     # track last index of each character
+    left = right = 0
+    res = []
+    for i, c in enumerate(s):
+        right = max(right, lastIndex[c])            # Iterate [s] and find right bound of current partition
+        if i == right:                      # reached [right] and a partition is found
+            res.append(right-left+1)            # size of partition is index difference +1
+            left = i+1
+    return res
+
+# 89.991 Broken Calculator ======================================================= https://leetcode.com/problems/broken-calculator/
+# Problem: There is a broken calculator that has an integer [startValue] on display. There are only two operations can be done:
+#          1. multiple current number by 2, or 2. subtract 1 from current number
+#          Given two integers [startValue] and [target], use two given operations and bring [startValue] to [target]. Return the
+#          minimum number of operations needed
+# Description: Bring [target] to [startValue]. Consider the reversed way, and operations becomes divid by 2 and add 1. If [startValue]
+#              is greater than [target], we can only subtract 1 and number of operations is [target-startValue]. If [target] is odd, 
+#              it can't be divided by 2, the only choice is to add 1. If [target] is even, we should always divid by 2, because divid
+#              2 is reduce [target] faster.
+# Time complexity: O(log(target))
+def brokenCalc(startValue: int, target: int) -> int:
+    if startValue >= target:                    # base case, add [startValue-target] time to bring [target] to [startValue]
+        return startValue-target
+    if target%2==1:                                 # odd [target], add 1 and increase operation number
+        return brokenCalc(startValue, target+1)+1       
+    return brokenCalc(startValue, target//2)+1          # even [target], divid 2 and increase operation number
+
+# 90.287 Find the Duplicate Number ====================================== https://leetcode.com/problems/find-the-duplicate-number/
+# Problem: Given an array with [n+1] item, where its items are integers in the range of [1,n]. There exists a number that is repeated
+#          at least once. Find and return the repeated number. Do it in O(n) time with O(1) space
+# Description: Slow and fast pointer chasing. It is same as find cycle starting point in a linked list. Consider each item is a node.
+#              The value of item represent the index of next node. For example, if nums[0] is 2, then nums[0] points to nums[2].
+#              Therefore, the repeated number is the starting node of cycle. Because the repeated number points to same node that
+#              is traversed, which create a cylce. 
+#              Use Floyd's algorithm to find the starting point. Firstly, user [slow] and [fast] to find the node where they [met],
+#              the distance from beginning to [cycle] start is same as distance between [met] and [cycle]. user two pointers to 
+#              traverse from beginning and [met], the repeated number is where two pointers meet
+# Time complexity: O(n)
+def findDuplicate(nums: List[int]) -> int:
+    slow = fast = 0         # [slow] and [fast] start from dummy node
+    while True:
+        slow = nums[slow]           # [slow] move one step
+        fast = nums[nums[fast]]     # [fast] move two steps
+        if slow == fast:
+            break
+    res = 0                     # traverse from beginning and [slow]
+    while res != slow:              
+        res = nums[res]
+        slow = nums[slow]
+    return res                  # repeated number is located at where they meet
+
+# 91.152 Maximum Product Subarray ========================================= https://leetcode.com/problems/maximum-product-subarray/
+# Problem: Given an integer array [nums], find a contigous non-empty subarray, whose elements have the largest product, return
+#          the product. 
+# Description: Dynamic Programming. Track both max and min product upto an index. We need to track both [cur_min] and [cur_max],
+#              because when an element [n] is negative, and if [cur_min] is also negative, [n*cur_min] can produce a larger number
+#              than [n*cur_max] when [cur_max] is positive. For each of the index, both [cur_max] and [cur_min] can come from
+#              [cur_max*n], [cur_min*n] or [n] (starting a new subarray). 
+# Time complexity: O(n)
+def maxProduct(nums: List[int]) -> int:
+    cur_max = cur_min = 1
+    res = float("-inf")
+    for n in nums:
+        temp = cur_max                      # [temp] store original value of [cur_max], as it is updated before [cur_min]
+        cur_max = max(temp*n, cur_min*n, n)     
+        cur_min = min(temp*n, cur_min*n, n)
+        res = max(cur_max, res)
+    return res
+
+# 92.153 Find Minimum in Rotated Sorted Array =================== https://leetcode.com/problems/find-minimum-in-rotated-sorted-array/
+# Problem: Given a sorted integer list, which has been shifted to right by arbitrary times, each integer of the list is unique.
+#          Find and return the minimum element in O(logN) time
+# Description: Bianry Search. The minimum element locates at the unsorted portion, and maintain [res] the current min. If [left]<[right]
+#              means this portion is sorted, the smallest number is [left], compare [left] with [res]. If [left] to [right] is not sorted
+#              find the [mid] and compare with [res]. Then if [mid]>=[left], left portion is sorted, shift [left] to [mid+1] to search
+#              right portion. If [mid]<[left], then left portion is not sorted shift [right] to [mid-1] to search left portion
+# Time complexity: O(logN)
+def findMin(nums: List[int]) -> int:
+    res = nums[0]
+    left, right = 0, len(nums)-1
+    while left<=right:
+        if nums[left]<=nums[right]:     # entire sublist is sorted, [left] contains minimum value
+           return min(res, nums[left])
+        mid = (left+right)//2
+        res = min(res, nums[mid])
+        if nums[left]<=nums[mid]:       # left is sorted, search right
+            left = mid+1
+        else:                           # right is sorted, search left
+            right = mid-1
+    return res
+
+# 93.162 Find Peak Element ====================================================== https://leetcode.com/problems/find-peak-element/
+# Problem: Given a list [nums], find and return the index of an element that is a peak element. A peak element is strictly greater
+#          than its neighbors. You can assume that there are negative infinity element at the two boundaries of [nums]
+# Description: Binary Search. Maintain [left] and [right], and [mid] as middle index. If [mid] is the largest among its neighbors
+#              [mid]>[mid-1] and [mid]>[mid+1], then [mid] is peak and return [mid]. If [mid-1]>[mid], then left part is increasing
+#              there must exists a peak in left, shift [right] to [mid-1] and search in left part. Else [mid]<[mid+1], then right 
+#              part is increasing, must exists a peak in right, shift [left] to [mid+1]
+# Time Complexity: O(logN)
+def findPeakElement(nums: List[int]) -> int:
+    def helper(nums, left, right):
+        if right == left:               # corner case, only one element left, return it
+            return left
+        if right-left == 1:             # corner case, only two elements left, return the larger one
+            return left if nums[left]>nums[right] else right
+        mid = (left+right)//2
+        if nums[mid-1]<nums[mid] and nums[mid]>nums[mid+1]:     # [mid] is largest among neighbors, return it
+            return mid
+        else:
+            if nums[mid-1]>nums[mid]:                   # left part is increasing, search in left
+                return helper(nums, left, mid-1)
+            elif nums[mid]<nums[mid+1]:                 # right part is increasing, search in right
+                return helper(nums, mid+1, right)
+    return helper(nums, 0, len(nums)-1)
+
+# 94.538 Convert BST to Greater Tree ================================== https://leetcode.com/problems/convert-bst-to-greater-tree/
+# Problem: Given the [root] of a binary search tree, convert it to a Greater Tree, such that value of node is the sum of all node
+#          that are greater than it.
+#          Ex:               4(30)                              
+#                          /       \                            
+#                       1(36)       6(21)
+#                     /   \         /   \        
+#                   0(36)  2(35)  5(26)  7(15)
+#                           \              \
+#                           3(33)         8(8)
+# Description: Post-order traversal. Use a global variable to track the current sum [curSum]. When traveral the tree, keep adding
+#              [node.val] to [curSum] and update [node.val]. Return [root] at the end
+def convertBST(root: Optional[TreeNode]) -> Optional[TreeNode]:
+    curSum = 0
+    def helper(node):
+        if not node:
+            return 
+        nonlocal curSum             # indicate [curSum] is declared outside of function 
+        # post-order traveral
+        helper(node.right)
+        val = node.val + curSum     # add [node.val] to [curSum]
+        node.val = curSum = val     # update [curSum] and [node.val]
+        helper(node.left)
+    helper(root)
+    return root
+
+# 95.1584 Min Cost to Connect All Points ================================= https://leetcode.com/problems/min-cost-to-connect-all-points
+# Problem: Given an array of points represent coordinate of points on 2D plate, where points[i] = [xi, yi]
+#          Return the minimum "manhattan distance" to connect all points. 
+#          Manhattan distance between two points [x1, y1] and [x2, y2] is |x1-x2| + |y1-y2|
+# Description: Prim's Algorithm, which starts from a random node and always pick the smallest edge which connect a visited node to an
+#              un-visited node, until all nodes are connected. 
+#              Create an adjacency map [adj] where key is index of point [i], and value is a list of tuples (distance, j), where [j] is 
+#              index of other point, and [distance] is distance between [i] and [j]
+#              Maintain min [heap] and set [visited] to track connected nodes. Initially [heap] contains (0, 0), that we start from point
+#              0 and it is 0 distance from itself. Find the point that is not connected and has minimum ditance to connected points. Pop
+#              the minimum distance point [i] from [heap], if [i] is not visited then add its [distance] to [res], and mark it as visited
+#              Iterate its adjacent point of adj[i], push unvisited point to [heap] with their [distance]. So that to find next un-visited
+#              point whose distance is minimum. Return [res] when all points are visited
+# Time complexity: O(N^2*logN), each points need to iterate all its neighbors (n^2), heappush in each iteration is logN
+import heapq
+def minCostConnectPoints(points: List[List[int]]) -> int:
+    # create adjacency map
+    adj = {i:[] for _ in range(points)}
+    for i in range(len(points)):
+        for j in range(i+1, len(points)):
+            dist = abs(points[i][0]-points[j][0])+abs(points[i][1]-points[j][1])
+            adj[i].append((dist, j))        # noted distance between [i] and [j]
+            adj[j].append((dist, i))
+    visited, res = set(), 0
+    heap = [(0, 0)]
+    # pick minimum cost edge to connect unconnected points
+    while len(visited)<len(points):
+        cost, i = heapq.heappop(heap)       # use [heap] to find minimum cost edge
+        if i in visited:                    # skip [i] if it is already connceted
+            continue
+        res += cost                         # [i] is the point being connected, add cost and mark [i] as connected
+        visited.add(i)
+        for neighborCost, neighbor in adj[i]:       # add [i]'s neighbor to [heap] to find next min cost
+            if neighbor not in visited:
+                heapq.heappush(heap, (neighborCost, neighbor))
+    return res
+    
+# 96.581 Shortest Unsorted Continuous Subarray ====================== https://leetcode.com/problems/shortest-unsorted-continuous-subarray/
+# Problem: Given an integer array [nums], a continuous subarray is not sorted in ascending order. Find the minimum length of continuous
+#          array. Such that after sorting the subarray, the entire [nums] is sorted in ascending order
+# Description: Find the largest and smallest number is unsorted subarray, and find the inserting index of them, the index difference is
+#              the length of unsorted subarray. Maintain a boolean flag [searchFlag],iterate [nums] from left to right. Set [searchFlag]
+#              to True, when encounter a descending [i]>[i+1], which means the unsorted array starts. When [searchFlag] is True, keep 
+#              looking for the minimum number. Then look for maximum number of unsorted array, reset [searchFlag] to False, and iterate 
+#              [nums] from right to left. Set [searchFlag] to True, when encounter a descending [i-1]>[i], which means the unsorted array 
+#              ends. Then look for maximum number. Iterate through [nums] find the index to insert minimum and maximum, return difference
+#              of index.
+# Time complexity: O(n)
+def findUnsortedSubarray(nums: List[int]) -> int:
+    minimum = float('inf')
+    searchFlag = False
+    for i in range(len(nums)-1):                    # find minimum in unsorted subarray
+        if not searchFlag and nums[i]>nums[i+1]:
+            searchFlag = True
+        if searchFlag and nums[i]<minimum:
+            minimum = nums[i]
+    maximum = float('-inf')
+    searchFlag = False
+    for i in reversed(range(1, len(nums))):         # find maximum in unsorted subarray
+        if not searchFlag and nums[i-1]>nums[i]:
+            searchFlag = True
+        if searchFlag and nums[i]>maximum:
+            maximum = nums[i]
+    left = right = 0
+    for i in range(len(nums)):                      # find insert index of minimum
+        if nums[i]>minimum:
+            left = i
+            break
+    for i in reversed(range(len(nums))):            # find insert index of maximum
+        if nums[i]<maximum:
+            right = i
+            break
+    return right-left+1 if right-left>0 else 0      # length is [index_diff + 1]
+
+# 97.341 Flatten Nested List Iterator ================================== https://leetcode.com/problems/flatten-nested-list-iterator/
+# Problem: Given a nested list of integers [nestedList]. Each element can be an integer or a list that may contains integers of other
+#          lists. Implement [NesttedIterator] class with following methods
+#          "hasNext()" return True if there exists at least an integer in the nested list, otherwise return False
+#          "next()" return the next integer in the nested list, assume "next()" is called after checking existence of next integer
+#          "constructor" that takes a [nestedList] as initial value
+# Description: Maintain a [stack]. Element of [nestedList] are stored in reverse order, so that first element of [nestedList] is at 
+#              the [top]. In constructor, [nestedList] is added to [stack] in reversed order. In "hasNext()" method, if no element 
+#              lefts in [stack] return False. Peek the [top], if [top] is an integer, return True. Else, [top] is a list, pop [top]
+#              and append its element to [stack] in reverse order. In "next()" method, since "hasNext()" already unwrapped list and
+#              [top] must be an integer, pop and return [top]
+class NestedInteger:
+    def isInteger(self) -> bool:
+        pass
+    def getInteger(self) -> int:
+        pass
+    def getList(self) -> List(NestedInteger):
+        pass
+
+class NestedIterator:
+    def __init__(self, nestedList: List(NestedIterator)):
+        self.stack = nestedList[::-1]       # reversed stack, so that first element of [nestedList] come at [top]
+    
+    def next(self) -> int:
+        return self.stack.pop().getInteger()
+
+    def hasNext(self) -> bool:
+        if not self.stack:                  # no element in [stack]
+            return False
+        while self.stack:
+            top = self.stack[-1]            # peek [top]
+            if top.isInteger():             # [top] is an integer
+                return True
+            self.stack.pop()                    # [top] is a list
+            self.stack += top.getList[::-1]     # unwrap list, pop and append [top] to [stack] in reversed order
+        return False  
+    
+# 98.1658 Minimum Operations to Reduce X to Zero ================ https://leetcode.com/problems/minimum-operations-to-reduce-x-to-zero/
+# Problem: Given an positive integer array [nums] and an integer [x]. In an operation, you can remove an element from either left-most  
+#          or right-most element from array [nums] and subtract it from [x]. Return the minimum operations needed to bring [x] to zero.
+#          If not possible return -1
+# Description: Convert this problem to find the longest subarray that has sum equals to [sum(nums)-x]. Thus, the remaining elements 
+#              must sum up to [x], and the remaining elements need to be removed via "operations".
+#              Maintain [left] index of subarray, current sum of subarray [currSum], and the maximum size of subarray [maxSize]. Iterate  
+#              through [nums] and keep adding elements to [currSum]. If [currSum] is larger than [target], subtract element [left] from
+#              [currSum] and move [left] to right by 1 index. If [currSum] equals to [target], calculate the current size of subarray,
+#              which is [right-left+1] update [maxSize] by taking the larger one between [maxSize] and current size. if none of above,
+#              keep adding elements to [currSum]. 
+#              At the end, if [maxSize] is larger than 0, then there exists such subarray, the number of operation is [len(nums)-maxSize].
+#              If [maxSize] is zero or negative, can't reduce [x] to zero
+# Time complexity: O(n)
+def minOperations(nums: List[int], x: int) -> int:
+    target = sum(nums)-x                    # [target] is target sum of subarray
+    if target<0:
+        return -1
+    if target == 0:
+        return len(nums)
+    left = currSum = maxSize = 0
+    for right, num in enumerate(nums):
+        currSum += num
+        while currSum > target:                 # [currSum] too big, remove element from left
+            currSum -= nums[left]
+            left += 1
+        if currSum == target:
+            maxSize = max(maxSize, right-left+1)        # update [maxSize] when a subarray is found
+    return len(nums)-maxSize if maxSize > 0 else -1
+
+# 99.820 Short Encoding of Words =============================================== https://leetcode.com/problems/short-encoding-of-words/
+# Problem: There's a string encoding method, consists of string [s] and an array of [indices]. Where [s] consists of several words
+#          that are separated by "#" and end with "#". Numbers in [indices] represent the starting index of [s], where the words between
+#          [index] and "#" is the word being encoded. Ex
+#          s = "time#bell#be#", indics = [0, 2, 5, 10], words = ["time", "me", "bell", "be"] => res = 13
+#          Given a list of [words], return the minimum length of [s] after encoding [words]
+# Description: Set solution. The words added to [s] are not suffix of any other words. "me" is suffix of "time" it is not a word in [s],
+#              and "be" is prefix of "bell" but not suffix of any, it is part of [s]. Find and remove words that are suffix of other 
+#              word, length of the remaining words combining "#" is the result
+# Time complexity: O(NM), N = number of words, M = number of characters in a word
+def minimumLengthEncoding(words: List[str]) -> int:
+    wordSet = set(words)
+    for w in words:
+        for i in range(1, len(w)):
+            if w[i:] in wordSet:            # find and remove [w] that is suffix of others
+                wordSet.remove(w[i:])
+    return len('#'.join(wordSet))+1         # combine with "#" and return length
+
+# Desciption: Trie solution. Trie is a tree of character nodes, the node in tree has an boolean attributes indicate whether this node
+#             is the end of a words. Thus, the path from root to a "end" node is a word. Each node also maintain a list of children,
+#             indicates the character appear after current character. 
+#             Load word to [Trie] with characters reversed, and maintain a list of tuple, each tuple contains end node of a word and the 
+#             length of that word. After loading words, check node of each tuple. If node has no children, means it is an end character
+#             and its word length is part of encoding string. If node has children, means the word ends here is a suffix of other word,
+#             the word can be encoded by other word and it should not go into encoded string. For each word in encoding string, add 1
+#             to length, as "#" is appended at the end of each word
+# Time complexity: O(N), N = total character of all word
+class TrieNode:
+    def __init__(self):
+        self.children = {}      # [childeren] is "character-TrieNode" mapping
+class TrieTree:
+    def __init__(self):
+        self.root = TrieNode()
+        self.leaves = []        # elements of [leaves] are tuples that consists of TrieNode of last character and length of current word
+    def add(self, word):
+        node = self.root
+        for c in word:
+            if c not in node.children:          # add new character after current node
+                node.children[c] = TrieNode()       
+            node = node.children[c]             # move to next node
+        self.leaves.append((node, len(word)))   # append tuple after iterate through a [word]
+
+def minimumLengthEncoding(words: List[str]) -> int:
+    tree = TrieTree()
+    for word in set(words):         # use "set" to remove duplicated word
+        tree.add(word[::-1])            # load [word] with character reversed
+    res = 0
+    for node, length in tree.leaves:
+        if len(node.children) == 0:           # find "ending" node, and calculate length
+            res += length + 1
+    return res
+
+# 100.166 Fraction to Recurring Decimal ======================================= https://leetcode.com/problems/fraction-to-recurring-decimal/
+# Problem: Given two integers [numerator] and [denominator] of a fraction, return the fraction in string format. If the fraction is repeating, 
+#          enclose the repeating part with parentheses. 
+#          Ex: numerator = 1, denominator = 2, res = "0.5"
+#              numerator = 1, denominator = 6, res = "0.1(6)"
+# Description: 1) Get the sign of result. 2) Extract the integer part. 3) Reminder multiplies by 10 to become [numerator]. Record numerator and
+#              if same numerator appear twice, it is repeating. 
+#              Maintain the [fraction] part as string. Record numerator and its index in [fraction]. When a [numerator] appear twice, the substring 
+#              of [fraction] between previous index and current is index is repeating, and we can enclose it with parentheses. If [numerator]
+#              becomes 0, the division is over without repeating fraction. Return combination of [sign], [integer] and [fraction]
+def fractionToDecimal(numerator: int, denominator: int) -> str:
+    sign = "" if numerator*denominator>=0 else "-"                      # extract [sign] of result
+    numerator, denominator = abs(numerator), abs(denominator)
+    integer = str(numerator//denominator)                               # extract [integer] part
+    numerator = (numerator%denominator)*10
+    record, i = {}, 0                           # record {numerator: index}
+    fraction = ""
+    while numerator:
+        if numerator in record:                 # repeating detected, repeating part is between record[numerator] to the end of [fraction]
+            return sign+integer+"."+fraction[:record[numerator]]+"("+fraction[record[numerator]:]+")"
+        record[numerator] = i
+        i += 1
+        fraction += str(numerator//denominator)             # append current quotient to [fraction]
+        numerator = (numerator%denominator)*10
+    return sign+integer+"."+fraction if fraction != "" else sign+integer        # no repeating found, return result w/ or w/o [fraction]
+

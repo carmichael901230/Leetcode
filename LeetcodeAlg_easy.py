@@ -2528,7 +2528,7 @@ def findLengthOfLCIS(nums):
             cur = 1
     return res 
 
-# 122.680 Valid Palindrome II
+# 122.680 Valid Palindrome II ==================================================== https://leetcode.com/problems/valid-palindrome-ii/
 # Problem: Given a non-empty String [s], Determine if the string can be a palindrome by deleting at most one char.
 # Description: Maintain two pointers [left] and [rigth] start from both end of string. Checking palidrome one char at a time, until they meet eachother.
 #              If [left] != [right], consider two conditions 1) skip one at left side, by checking if s[left+1:right+1] is palindrome, or 
@@ -2539,7 +2539,7 @@ def validPalindrome(s):
     left, right = 0, len(s)-1
     while left<right:
         if s[left] != s[right]:
-            skipLeft, skipRight = s[left+1, right+1], s[left, right]
+            skipLeft, skipRight = s[left+1:right+1], s[left:right]
             return skipLeft[::-1]==skipLeft or skipRight[::-1]==skipRight
         left, right = left+1, right-1
     return True
@@ -2682,7 +2682,8 @@ def searchBST(root, val):
 #          "add(val)" is a method of the class, which insert [val] into the list, and return kth largest number after insertion. If the [stream] has
 #          less than [k] element, return the smallest element
 # Description: Use "heapq" module in Python to maintain a min-heap of size [k], where heap[-1] is the smallest element and heap[0] is the kth
-#              largest element. Use "heapq.heappushpop(val)" which push(val) and then pop min value to maintain heap size
+#              largest element. Use "heapq.heappush(list, val)" to add [val] and use "heapq.heappop(list)" to remove small values. The kth largest
+#              value is always maintained at index 0
 # Time Compexity: constructor O(n), add O(1)
 import heapq
 class KthLargest:
@@ -2692,82 +2693,51 @@ class KthLargest:
         self.pool = nums
         while len(self.pool) > k:               # get rid of extra element, and keep [k] elements
             heapq.heappop(self.pool)
-    def add(self, val):
-        # add val to heap if there is empty space in heap
-        if len(self.pool)<self.k:
-            heapq.heappush(self.pool, val)
-        # if no more empty space, and inserting [val] is larger than minimum value in [heap]
-        elif val > self.pool[0]:
-            heapq.heappushpop(self.pool, val)              # "heappushpop(val)" firstly push(val), then pop and return min
-        return self.pool[0]                     # pool[0] always hold the kth largest number
+    def add(self, val: int) -> int:
+        heapq.heappush(self.pool, val)          # add [val] to list
+        if len(self.pool) > self.size:          # remove smaller values
+            heapq.heappop(self.pool)
+        return self.pool[0]
 
 # 130.705 Design HashSet
 # Problem: Implement a HashSet of integers, with following methods
 #          1) void add(key), insert "key" into HashSet in O(1)
 #          2) boolean contains(key), check if the HashSet contains "key" in O(1)
 #          3) void remove(key), Remove the "key" from HashSet in O(1), if "key" is not presented, do nothing
-# Description: Use a dynamic list to store keys. If size of array exceeds 2/3 of capacity, expand capacity by 2 times, and reinsert "key"s into new list.
-#              The average time complexity of inserting an element is still O(1). 
-#              For "add(key)"" method, implement a hash method to find index to insert, where "insertPos = key%capacity". Keys will have "collision", 
-#              use "double hashing", that use previous [insertPos] and hash it again with another hash function [insertPos] = (5*insertPos+1)%capacity,
-#              keep looking for [insertPos] until a empty spot in list is found.
-#              For "remove(key)", use the same "double hashing" mechanic to find the "key". If any "None" element is encountered, return and do nothing,
-#              because the "key" is not presented. If the "key" is found, mark it as "deleted" instead of make it "None", because we don't want to stop
-#              searching at unexpected spot.
-#              For "contains(key)" method, Use the same strategy of "remove(key)", leverage "double hashing" to find the "key" or return False when encount
-#              "None"
-class MyHashMap:
-    def __init__(self) -> None:
-        self.capacity = 8
-        self.size = 0
-        self.data = [None]*self.capacity
+# Description: Use a fixed-size two List to hold values. "_hash(key)" method hash the [key] to find the index to insert. "_index(key)" returns
+#              the desried [bucket] that the [key] should be located. Also return an [index] if [key] already presented in [bucket], or 
+#              returns None, when [key] does not exists in [bucket] yet. 
+#              "add()" calls "_index()" to check if [key] already presents, and determine to insert to [bucket] or not
+#              "remove()" calls "_index()" to retrive the [bucket], and remove [key] from [bucket] depending on [key] exists or not
+#              "contains()" calls "_index()" to check existence of [key]
+class MyHashSet:
+    def __init__(self):
+        self.size = 1000
+        self.pool = [[] for _ in range(self.size)]
 
-    def hash_1(self, key):
-        return key % self.capacity
+    def add(self, key: int) -> None:
+        bucket, index = self._index(key)        # find the [bucket]
+        if index is None:                       # append when [key] doesn't present
+            bucket.append(key)
 
-    def hash_2(self, key):
-        return (5*key+1) % self.capacity
+    def remove(self, key: int) -> None:     
+        bucket, index = self._index(key)        # find the [bucket]
+        if index is not None:                   # remove when [key] presents
+            bucket.remove(key)
+
+    def contains(self, key: int) -> bool:
+        bucket, index = self._index(key)        # if [index] is None, [key] doesn't exist
+        return index is not None
+        
+    def _hash(self, key: int) -> int:
+        return key % self.size
     
-    def add(self, key):
-        # expand capacity if exceeds 2/3 of capacity
-        if self.size >= 2/3*self.capacity:
-            self.capacity *= 2
-            newData = [None] * (self.capacity)
-            for num in self.data:
-                if num and num != "deleted":
-                    pos = self.hash_1(num)
-                    while newData[pos] is not None:
-                        pos = self.hash_2(pos)
-                    newData[pos] = num
-            self.data = newData
-        # find position to insert key 
-        pos = self.hash_1(key)
-        while self.data[pos]  is not None:
-            if self.data[pos] == key:           # "key" is already in the hashset, no need to add it again
-                return 
-            if self.data[pos] == "deleted":      # "key" is added and deleted, add it at where it was deleted
-                break
-            pos = self.hash_2(pos)
-        # insert key
-        self.data[pos] = key    
-        self.size += 1
-    
-    def remove(self, key):
-        pos = self.hash_1(key)
-        while self.data[pos]  is not None:
-            if self.data[pos] == key:
-                self.data[pos] = "deleted"
-                self.size -= 1
-                return
-            pos = self.hash_2(pos) 
-
-    def contains(self, key):
-        pos = self.hash_1(key)
-        while self.data[pos]  is not None:
-            if self.data[pos] == key:
-                return True
-            pos = self.hash_2(pos)
-        return False
+    def _index(self, key: int):
+        bucket = self.pool[self._hash(key)]
+        for i, k in enumerate(bucket):
+            if k == key:                    # if [key] presents, return its index
+                return bucket, i
+        return bucket, None                 # if [key] doesn't exist, return None
 
 # 131.706 Design Hashmap ============================================= https://leetcode.com/problems/design-hashmap/
 # Problem: Implement a Hashmap class, where key and value are both positive integers. The methods of the class are following
@@ -2787,26 +2757,21 @@ class MyHashMap_2:
 
     def put(self, key, value):
         pos = self.hash(key)
-        # pos is not occupied, insert new node directly
-        if self.data[pos] is None:
+        if self.data[pos] is None:                  # pos is not occupied, insert new node directly
             self.data[pos] = ListNode(key, value)
-        # pos is occupied
-        else:
+        else:                                       # pos is occupied
             cur = self.data[pos]
             while cur is not None:
-                # key presents, update its value and return
-                if cur.key == key:
+                if cur.key == key:                  # key presents, update its value and return
                     cur.value = value
                     return
-                # hit end of chain, insert new node at the tail
-                elif cur.next == None:
+                elif cur.next == None:              # hit end of chain, insert new node at the tail
                     cur.next = ListNode(key, value)
                     return
                 cur = cur.next
 
     def get(self, key):
-        pos = self.hash(key)
-        cur = self.data[pos]
+        cur = self.data[self.hash(key)]
         while cur:
             if cur.key == key:
                 return cur.value
@@ -2816,13 +2781,10 @@ class MyHashMap_2:
     def remove(self, key):
         pos = self.hash(key)
         cur = pre = self.data[pos]
-        # pos is empty, no key presents
-        if cur is None: return
-        # first node in pos matches key, remove it
-        elif cur.key == key:
+        if cur is None: return              # pos is empty, no key presents
+        elif cur.key == key:                # first node in pos matches key, remove it
             self.data[pos] = cur.next
-        # look into chain and find key
-        while cur is not None:
+        while cur is not None:              # look into chain and find key
             if cur.key == key:
                 pre.next = cur.next
             else:
@@ -3212,3 +3174,105 @@ def largestTriangleArea(points: List[List[int]]) -> float:
                 area = (a[0]-b[0])*(a[1]-c[1])+(c[0]-a[0])*(a[1]-c[1])+(c[0]-a[0])*(c[1]-b[1])      # use formuale to get area of ABC
                 res = max(area, res)
     return res/2
+
+# 151.414 Third Maximum Number ================================================== https://leetcode.com/problems/third-maximum-number/
+# Problem: Given an integer array [nums], return the Third distinct maximumn number in the array. If there are less than three distinct
+#          number in array, return the largest
+# Description: Use three variables to hold three largest numbers in the array [l], [m], [s]. Itearate through [nums], track and update
+#              three largest numbers
+# Time Complexity: O(n)
+def thirdMax(nums: List[int]) -> int:
+    l = m = s = -float('inf')
+    for n in nums:
+        if n>l:                 # [n] is larger than [l], shift three numbers
+            l, m, s = n, l, m
+        elif l>n>m:             # [n] is smaller than [l] larger than [m], shift [m] and [s]
+            m, s = n, m
+        elif m>n>s:             # [n] is larger than [s], update [s]
+            s = n
+    return s if s!=-float('inf') else l         # return [l] if no more than 2 distinct numbers
+
+# 152.938 Range Sum of BST ========================================================== https://leetcode.com/problems/range-sum-of-bst/
+# Problem: Given a [root] of binary search tree (BST), and two integers [low] and [high]. Return the sum of values of all nodes with 
+#          a value in the inclusive range [low, high].
+# Description: Recursion. Encounter a [root.val] within [low, high], keep looking at both children as their value may also fall into
+#              [low, high], return value is sum of [root.val] and value returned from both children. Enconter a [root.val] smaller 
+#              than [low], only look at right child as [root.val] is too small, and only right child may fall into the range. Similar 
+#              to [root.val] larger than [high], only look at left child.
+# Time complexity: O(logN)
+def rangeSumBST(root: Optional[TreeNode], low: int, high: int) -> int:
+    if root:
+        if low<=root.val<=high:
+            return rangeSumBST(root.left, low, high)+rangeSumBST(root.right,low,high)+root.val
+        if root.val>high:
+            return rangeSumBST(root.left, low, high)
+        if root.val<low:
+            return rangeSumBST(root.right, low, high)
+    return 0
+
+# 153.1009 Complement of Base 10 Integer ================================ https://leetcode.com/problems/complement-of-base-10-integer/
+# Problem: Given an integer [n] of base 10, return its binary complement in base 10
+#          Complement of an integer is flip all '0' bits to '1' and all '1' bits to '0'.
+# Description: Find the a [mask] of [n], that has same bit digits and all bits are '1's. Subtract [mask] with [n], we get complement
+# Time complexity: O(logn)
+def bitwiseComplement(n: int) -> int:
+    mask = 1
+    while mask<n:           # build [mask] with same bit digits as [n]
+        mask = mask*2+1
+    return mask-n           # subtract to get complement
+
+# 154.1260 Shift 2D Grid ============================================================= https://leetcode.com/problems/shift-2d-grid/
+# Problem: Given a 2D [grid] and an integer [k]. Shift element to right by [k] times. Each shift, the element [i][j] is shifted to
+#          [i][j+1]. If [j+1] is larger than right boundary, move it to [i+1][0]. If [i][j] is the element at right-bottom corner,
+#          move it to [0][0].
+# Description: Shift [k] times is same as move to right by [k] index. Create a new grid [res] with same size of [grid] to maintain
+#              the shifted result, an element at [i][j] is moved to [i][j+k]. Need to check whether [j+k] hits the boundary, 
+#              (j+k)//cols gives how many rows to shift down, and (j+k)%cols gives how many columns to shift right. In case down-shift
+#              hits lower boundary, actual [i] is (i+(j+k)//cols)%rows
+# Time complexity: O(n*m)
+def shiftGrid(grid: List[List[int]], k: int) -> List[List[int]]:
+    m, n = len(grid), len(grid[0])      
+    if k %(m*n)==0:                    # early termination, shift m*n times is same as not shift
+        return grid
+    
+    res = [[None]*n for _ in range(m)]
+    for i in range(m):
+        for j in range(n):
+            res[(i+(j+k)//n)%m][(j+k)%n] = grid[i][j]       # find new position for [i][j]
+    return res
+
+# 155.1030 Matrix Cells in Distance Order =========================== https://leetcode.com/problems/matrix-cells-in-distance-order/
+# Problem: Given size of matrix [rows], [cols] and given a coordinate [rCenter], [cCenter]. Return cooredinate of all cells in matrix,
+#          in the format of [i, j], sorted by their distance from [rCenter, cCenter] in ascending order. 
+#          The distance between two cells is abs(i1-i2)+abs(j1+j2). A cell may has same distance to multiple cells, the cells of
+#          same distance can be returned in any order
+# Description: BFS. Start from [rCenter, cCenter], do bfs and append 4-way connected cells to [res]. Maintain a set [visited] to track 
+#              if cell is visited, and only search on un-visited cells
+# Time Complexity: O(rows*cols)
+from collections import deque
+def allCellsDistOrder(rows: int, cols: int, rCenter: int, cCenter: int) -> List[List[int]]:
+    visited, res = set(), []
+    queue = deque()
+    queue.append([rCenter, cCenter])
+    while queue:
+        i, j = queue.popleft()
+        if i>=0 and i<rows and j>=0 and j<cols and (i, j) not in visited:
+            res.append([i,j])
+            visited.add((i,j))
+            queue.append([i-1,j])
+            queue.append([i+1,j])
+            queue.append([i,j-1])
+            queue.append([i,j+1])
+    return res
+
+# 156.338 Count Bits ============================================================== https://leetcode.com/problems/counting-bits/
+# Problem: Given an integer [n], return an array of size [n+1], where [i]th item represent the number of "1"s in binary [i].
+#          For example n=5, and array contains number [0,1,2,3,4,5], the corresponding number of "1"s are [0,1,1,2,1,2]
+# Description: Dynamic Programming. The bitwise of [i] is combination of bitwise [i//2] concatenate with [i%2]. Such as, [i]=5
+#              is combination of bin(2)+5%2 => 10+1 => 101. Therefore, the number of '1's is "arr[i//2]+i%2"
+# Time complexity: O(N)
+def countBits(n: int) -> List[int]:
+    res = [0]
+    for i in range(1,n+1):
+        res.append(res[i//2]+i%2)       # [i] is combination of [i//2] and i%2
+    return res
