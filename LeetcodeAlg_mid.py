@@ -2686,3 +2686,18 @@ def fractionToDecimal(numerator: int, denominator: int) -> str:
         numerator = (numerator%denominator)*10
     return sign+integer+"."+fraction if fraction != "" else sign+integer        # no repeating found, return result w/ or w/o [fraction]
 
+# 101.167 Two Sum II - Input Array Is Sorted ========================== https://leetcode.com/problems/two-sum-ii-input-array-is-sorted/
+# Problem: Given an array of integers [numbers], its elements are sorted in non-decreasing order. Given another integer [targer], find
+#          two numbers in [numbers], whose sum is equal to [target]. Return the indices of two number of 1-indexed
+# Description: Dictionary. Maintain a [dic], whose key is compensation of each number [target-num], and value is index of [num]. 
+#              Iterate through [numbers] and record compensation of [nums] and index. If a [num] is found in [dic] as compensation,
+#              return compenstaion's index +1 and current index +1
+# Time complexity: O(N)
+def twoSum(numbers: List[int], target: int) -> List[int]:
+    dic = {}
+    for i, num in enumerate(numbers):
+        if num not in dic:
+            dic[target-num] = i         # record compensation and its index
+        else:
+            return [dic[num]+1, i+1]        # a [nums] is found as compensation
+
