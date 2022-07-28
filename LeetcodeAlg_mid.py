@@ -2701,3 +2701,18 @@ def twoSum(numbers: List[int], target: int) -> List[int]:
         else:
             return [dic[num]+1, i+1]        # a [nums] is found as compensation
 
+# 102.172 Factorial Trailing Zeroes ======================================= https://leetcode.com/problems/factorial-trailing-zeroes/
+# Problem: Given an integer [n], return the number of tailing zeros of factorial n!
+# Description: Zeros comes from the production of 2 and 5, and there are more 2s than 5s in a factorial. Therefore, need to count
+#              the number of 5 in the factoral.
+#              Keep dividing [n] by 5, each division tells you how many 5s. 
+#              Ex: 5! = 1*2*3*4*5 ==> 5/5 = 1 ==> there is a 5 in 5!
+#                  25! = 1*...5...10...15...20...25 
+#                      = 1*...5...2*5...3*5...4*5...5*5 ==> 25/5 = 5, 5/5 = 1 ==> there are six 5s
+# Time complexity: O(log5(N))
+def trailingZeroes(n: int) -> int:
+    res = 0
+    while n>0:
+        n //= 5
+        res += n
+    return res 
