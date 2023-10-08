@@ -56,6 +56,8 @@ def addTwoNumbers(l1: ListNode, l2: ListNode) -> ListNode:
 #              with current length "i-start+1". If a character is already in [track] and [start] comes before the last occurance of the character,  
 #              means current substring has duplicates. Set [start] to the next index of the duplicate to start a new substring. For every character
 #              record index of latest occurrence
+# In short: Iterate through [s], track [start] of current substring, and [lastShown] index of character. If encounter a [c] whose [lastShown] comes 
+#           after [start], then current substing has duplicate of [c]
 # Time complexity: O(N)
 def lengthOfLongestSubstring(s: str) -> int:
     track = {}
@@ -89,8 +91,8 @@ def longestPalindrome(s):
 
 def longestPalindrome_help(s, l, r):
     while l>=0 and r<len(s) and s[l] == s[r]:   
-        i, j = l-1, r+1     # expand substring on both sides
-    return s[i+1: j]            # return the last valid palindrome
+        l, r = l-1, r+1     # expand substring on both sides
+    return s[l+1: r]            # return the last valid palindrome
 
 # 4.6 ZigZag Conversion ====================================================== https://leetcode.com/problems/zigzag-conversion/
 # Problem: Given a string [s], and an integer [numRows]. Display the [s] in ZigZag pattern with [numRows] rows. Return the a 
@@ -249,6 +251,8 @@ def threeSum(nums: List[int]) -> List[List[int]]:
 #              [target]. If [sum]<[target], move [j] to right to increase [sum]. If [sum]>[target], move [k] to left to decrease
 #              [sum]. If [sum]=[target], then return [sum] since it is the closest. For each combination of [i], [j], [k], track
 #              the smallest difference between [target] and [sum], and maintain [sum]
+# In short: Sort [nums], iterate through [nums] with [i], use [left] and [right] pointer to find sum=0. Skip duplicates on [i],
+#           and skip duplicates on [left] and [right] when a solution is found
 # Time complexity: O(n^2)
 def threeSumClosest(nums: List[int], target: int) -> int:
     nums.sort()
@@ -270,7 +274,7 @@ def threeSumClosest(nums: List[int], target: int) -> int:
     return res
         
 # 10.17 Letter Combinations of a Phone Number ====================== https://leetcode.com/problems/letter-combinations-of-a-phone-number/
-# Problem: Consider a cell phone keyboard, numbers from 2 to 9 have alphabets binded to them, where 2="abc", 3="def", 4="ghi", 5="jkl",
+# Problem: Consider a cell phone keyboard, numbers from 2 to 9 have alphabets binded to them, where 2="abc", 3="def", 4="ghi",  ="jkl",
 #          6="mno", 7="pqrs", 8="tuv", 9="wxyz". Given a string with [digits] from 2 to 9, construct a list contains all possible 
 #          combinations that [digits] can represent
 #          Ex: "23", 2="abc" 3="def" ===> ["ad","ae","af","bd","be","bf","cd","ce","cf"]
@@ -593,11 +597,13 @@ def isValidSudoku(board: List[List[str]]) -> bool:
 def combinationSum(candidates: List[int], target: int) -> List[List[int]]:
     candidates.sort()
     dp = [[] for _ in range(target+1)]
-    for t in range(1, target+1):                #dp[t] saves all combinations have t sum
+    for t in range(1, target+1):                # dp[t] saves all combinations have t sum
         for c in candidates:
-            if c > t: break                         #from now on, all sum > t, break out
-            if c == t: dp[t].append([c]); break         #the element value equals to current target t
-            # to ensure no duplicate, the later coming item should be strictly greater than previous ones, make the result a asc sequence. 
+            if c > t: break                         # from now on, all sum > t, break out
+            if c == t:                              # the element value equals to current target t
+                dp[t].append([c])
+                break         
+            # to ensure no duplicate, the later coming item should be strictly greater than previous ones, make the result an ascending order. 
             for path in dp[t-c]:
                 if c>=path[-1]:
                     dp[t].append(path+[c])
@@ -705,27 +711,25 @@ def permute_helper(pool, temp, res):
 # Problem: Given a list of integers [nums] with duplicates. Return all possbile "unique" permutations in a list.
 # Description: Back track on keys of Counter(nums) as [counter]. [counter] doesn't have duplicate keys, back track on Counter(nums) helps get rid 
 #              of duplicates. Maintain a list [temp] holding current perumutation, and [res] as result list holding permutations. Each recursion 
-#              iterate though key of [counter], if counter[key] > 0, append [key] to [temp], reduce counter[key] by 1. Then pass the reduced 
-#              [counter] and appended [temp] to next recursion. After each recusive call, restore counter[key] by adding 1 back to it, and 
-#              pop last integer added before recursive call. When [temp] has same length of [nums], means all integer is added to [temp], so
-#              append [temp] to [res]
+#              iterate though key of [counter]. If counter[key] > 0, means there are [key]s can be appended to [temp]. Reduce counter[key] by 1
+#              after appending to [temp]. After each recusive call, restore counter[key] by adding 1 back to it. When [temp] has same length of 
+#              [nums], means all nums are added to [temp]. Add [temp] to [res]
 # Time complexity: O(n^2)
 from collections import Counter
-def permuteUnique(self, nums: List[int]) -> List[List[int]]:
-    res = []
-    permuteUnique_helper(Counter(nums), len(nums), [], res)
-    return res
+def permuteUnique(nums: List[int]) -> List[List[int]]:
+    def permuteUnique_helper(numCnt, temp, res):
+        if len(temp) == len(nums):          # all numbers in [num] are added to [res], this permutation is finished
+            res.append(temp)
+            return
+        for num in numCnt.keys():
+            if numCnt[num] > 0:             # should has at least one [num] left
+                numCnt[num] -= 1                # reduce counter[num] by 1, since it is added to [temp]
+                permuteUnique_helper(numCnt, temp+[num], res)
+                numCnt[num] += 1                # add counter[num] back, after current recursion
 
-def permuteUnique_helper(counter, length, temp, res):
-    if len(temp) == length:
-        res.append(temp[:])         # append deep copy of [temp], since [temp] will be modified along the recursion
-    for n in counter:
-        if counter[n]>0:            # counter[n]>0, means there is "n" that can be inserted to [temp]
-            temp.append(n)              # append [n] to [temp] and reduce [counter] of "n"
-            counter[n] -= 1
-            permuteUnique_helper(counter, length, temp, res)
-            counter[n] += 1             # restore [counter] and [temp]
-            temp.pop()
+    res = []
+    permuteUnique_helper(Counter(nums), [], res)
+    return res
 
 # 26.48 Rotate Image =============================================================================== https://leetcode.com/problems/rotate-image/
 # Problem: Given a "n*n" [matrix], rotate the matrix by 90 degree clockwise. Modify the [matrix] "in-place"
@@ -1403,6 +1407,19 @@ def numDecodings(s: str) -> int:
             dp[i] += dp[i-2]
     return dp[-1]
 
+# Description: Dynamic Programming, with Two variable tracking dp[i-2] and dp[i-1]. If take one character and it is between 1 and 9, use dp[i-1].
+#              If take two character and it's between 10 and 26, use dp[i-2]
+# Space Complexity: O(1)
+def numDecodings(s: str) -> int:
+    preTwo = 1
+    preOne = 1 if s[0]!="0" else 0
+    for i in range(1, len(s)):
+        takeOne = preOne if 0<int(s[i])<10 else 0
+        takeTwo = preTwo if 9<int(s[i-1:i+1])<27 else 0
+        preTwo = preOne
+        preOne = takeOne+takeTwo
+    return preOne
+
 # 52.92 Reverse Linked List II ======================================================== https://leetcode.com/problems/reverse-linked-list-ii/
 # Problem: Given the [head] of a linked list, and two integers [left] and [right], where [left]<=[right]. Reverse the node from position [left]
 #          to position [right], return the head of reversed list.
@@ -1542,6 +1559,22 @@ def isInterleave(s1: str, s2: str, s3: str) -> bool:
             dp[i][j] = (dp[i-1][j] and s1[i-1]==s3[i+j-1]) or (dp[i][j-1] and s2[j-1]==s3[i+j-1])  # fill [i][j] from either [i-1][j] or [i][j-1]
     return dp[-1][-1]               # last element of [dp] holds result
 
+# Description: DP with Space complexity O(len(s2)). Maintain a DP of size len(s2)+1, that represent a row of DP in previous method. Populate initial
+#              DP by only picking character of [s2]. Iterate through [s1] and [s2], dp[0] is only picking character of [s1]. 
+#              note: DP has len(s1)+1 rows and len(s2)+1 columns
+# Time complexity: O(n*m)
+# Space complexity: O(m)
+def isInterleave(s1: str, s2: str, s3: str) -> bool:
+    if len(s1)+len(s2)!=len(s3): return False
+    dp = [True for _ in range(len(s2)+1)]
+    for j in range(1,len(s2)+1):
+        dp[j] = dp[j-1] and s2[j-1] == s3[j-1]              # initialize dp by picking only s2 character
+    for i in range(1, len(s1)+1):
+        dp[0] = dp[0] and s1[i-1]==s3[i-1]                  # index 0 represent picking only s1 character
+        for j in range(1, len(s2)+1):
+            dp[j] = (dp[j-1] and s2[j-1] == s3[i+j-1]) or (dp[j] and s1[i-1] == s3[i+j-1])   # (take char from [s2]) or (take char from [s1])
+    return dp[-1]
+
 # 57.98 Validate Binary Search Tree =================================================== https://leetcode.com/problems/validate-binary-search-tree/
 # Problem: Given the [root] of a binary search tree, determine if the tree is valid. A valid BST has following proerties:
 #          1. left subtree of a [node] contains nodes that smaller than [node.val]
@@ -1601,7 +1634,7 @@ def recoverTree(root: TreeNode) -> None:
 #              and recursive invoke helper function on [node.left] and [node.right], with [level+1]. If [node] is None, means current path reach 
 #              end, end current traversal by returning
 # Time complexity: O(N)
-def levelOrder(root: TreeNode) -> List[List[int]]:
+def levelOrder_DFS(root: TreeNode) -> List[List[int]]:
     res = []
     levelOrder_helper(root, 0, res)
     return res  
@@ -1613,7 +1646,27 @@ def levelOrder_helper(root, level, res):
         res.append([])
     res[level].append(root.val)                     # add current [node] to corresponding level in [res]
     levelOrder_helper(root.left, level+1, res)          # recursive invoke on child nodes
-    levelOrder_helper(root.right, level+1, res)            
+    levelOrder_helper(root.right, level+1, res)   
+
+# Description: BFS while tracking node level
+# Time complexity: O(N)
+def levelOrder_BFS(root: Optional[TreeNode]) -> List[List[int]]:
+    if not root:
+        return []
+    res = []
+    queue = deque()             # queue for BFS
+    queue.append((root, 0))
+    while queue:
+        node, level = queue.popleft()
+        if len(res) <= level:           # new level reached, increase [res] size
+            res.append([node.val])
+        else:                           # node of existing level
+            res[level].append(node.val)
+        if node.left:
+            queue.append((node.left, level+1))
+        if node.right:
+            queue.append((node.right, level+1))
+    return res         
 
 # 60.103 Binary Tree Zigzag Level Order Traversal ============================ https://leetcode.com/problems/binary-tree-zigzag-level-order-traversal/
 # Problem: Given a [root] of binary tree, return the "zig-zag" level order traversal. Return node values in a 2D list, where each 
@@ -1672,21 +1725,21 @@ def buildTreePre(preorder: List[int], inorder: List[int]) -> TreeNode:
 #             The first element of [preorder] is the "root", find index of preorder[0] in [inorder], denote as [ind]. Current "root" is preorder[0].
 #             inorder[in_beg:ind] are node of left-subtree, inorder[ind+1:in_end] are nodes in right-subtree. And we know the number of nodes in left-subtree
 #             is "[ind]-[in_beg]". Thus, sublist of [inorder] for left subtree is from [in_beg] to [ind], and for right subtree is from [ind+1] to [in_end]. 
-#             sublist of [preorder] for left subtree is from [pre_beg]+1 to [pre_beg]+1+[ind]-[in_beg], sublist for right subtree is fronm [pre_beg]+1+[ind]-[in_beg] 
+#             sublist of [preorder] for left subtree is from [pre_beg]+1 to [pre_beg]+[ind]-[in_beg], sublist for right subtree is fronm [pre_beg]+1+[ind]-[in_beg] 
 #             to [pre_end]. 
 # Time complexity: O(n), [ind] look up is constant
 def buildTreePre_2(preorder: List[int], inorder: List[int]) -> TreeNode:   
     def helper(pre_beg, pre_end, in_beg, in_end):
-        if pre_beg<pre_end:                                     # [pre_beg]>=[pre_end] means 
+        if pre_beg<=pre_end:                                     # [pre_beg]>=[pre_end] means 
             ind = dic[preorder[pre_beg]]
             root = TreeNode(preorder[pre_beg])
-            root.left = helper(pre_beg+1, pre_beg+1+ind-in_beg, in_beg, ind)        # pass sublist to build left subtree
+            root.left = helper(pre_beg+1, pre_beg+ind-in_beg, in_beg, ind-1)        # pass sublist to build left subtree
             root.right = helper(pre_beg+1+ind-in_beg, pre_end, ind+1, in_end)       # pass sublist to build right subtree
             return root
         return None
             
     dic = {num:i for i, num in enumerate(inorder)}          # create an "index" loop up dictionary for [inorder]
-    return helper(0, len(preorder), 0, len(inorder))
+    return helper(0, len(preorder)-1, 0, len(inorder)-1)
 
 # 62.106 Construct Binary Tree from Inorder and Postorder Traversal ======= https://leetcode.com/problems/construct-binary-tree-from-inorder-and-postorder-traversal/
 # Problem: Given two list [inorder] and [postorder] representing "inorder" and "postorder" traversal of a binary tree. Construct the binray tree and return its root
@@ -2009,7 +2062,7 @@ def singleNumber(nums: List[int]) -> int:
 #              while dp[i-len(word)] is True, meaning everything before occurence of [word] can be segmented. After iterate through [s], dp[-1]
 #              contains the result for whether [s] can be segmented or not
 # Time complexity: O(s*w) s=len(s) w=len(wordDict)
-def wordBreak(self, s: str, wordDict: List[str]) -> bool:
+def wordBreak(s: str, wordDict: List[str]) -> bool:
     dp = [True]+[False]*len(s)          # dp contains len(s)+1 elements, where first element is always True as base case
     for i in range(1, len(s)+1):            # iterate [i] from 1 to len(s)+1
         for word in wordDict:
@@ -2384,6 +2437,7 @@ def findDuplicate(nums: List[int]) -> int:
 #              because when an element [n] is negative, and if [cur_min] is also negative, [n*cur_min] can produce a larger number
 #              than [n*cur_max] when [cur_max] is positive. For each of the index, both [cur_max] and [cur_min] can come from
 #              [cur_max*n], [cur_min*n] or [n] (starting a new subarray). 
+# In Short: Track min and max, because min is negative and multiple with negative number can produce positive
 # Time complexity: O(n)
 def maxProduct(nums: List[int]) -> int:
     cur_max = cur_min = 1
@@ -2557,11 +2611,11 @@ class NestedInteger:
         pass
     def getInteger(self) -> int:
         pass
-    def getList(self) -> List(NestedInteger):
+    def getList(self):
         pass
 
 class NestedIterator:
-    def __init__(self, nestedList: List(NestedIterator)):
+    def __init__(self, nestedList):
         self.stack = nestedList[::-1]       # reversed stack, so that first element of [nestedList] come at [top]
     
     def next(self) -> int:
@@ -2716,3 +2770,707 @@ def trailingZeroes(n: int) -> int:
         n //= 5
         res += n
     return res 
+
+# 103.173 Binary Search Tree Iterator ==================================== https://leetcode.com/problems/binary-search-tree-iterator/
+# Problem: Implement BTSIterator class that represent over the in-order traversal of a binary search tree.
+#          Constructor of BSTIterator takes [root] of a BST 
+#          boolean hasNext(), returns True if exists a node in BST that has not been traversed yet, return False otherwise
+#          int next(), return the value of current node in the traversal 
+#          Implement next() and hasNext() to run in average O(1) time and use O(h) space, where [h] is height of BST
+# Description: Stack. Constructor push nodes from left-most path into [stack], where the last element is the smallest node in BST.
+#              next() pop element from [stack], traverse left path of right child of poppped node and append to [stack]. The second
+#              smallest node is at the end of that path
+#              hasNext() depends on whether element left in stack or not
+# Time complexity: next() => average O(1), constructor => O(h), hasNext() => O(1)
+class BSTIterator:
+    def __init__(self, root: Optional[TreeNode]):
+        self.stack = []
+        while root:                     # append left-most path
+            self.stack.append(root)
+            root = root.left
+
+    def next(self) -> int:
+        ret = self.stack.pop()          # pop smallest node
+        cur = ret.right                 # append left path of right child of smallest node
+        while cur:
+            self.stack.append(cur)
+            cur = cur.left
+        return ret.val
+
+    def hasNext(self) -> bool:
+        return len(self.stack)!=0
+
+# 104.377 Combination Sum IV ==================================================== https://leetcode.com/problems/combination-sum-iv/
+# Problem: Given an array of distince integers [nums] and an integer [target]. Return the number of combinations that sum up to
+#          [target]. Integers of [nums] can be used zero or more times
+# Description: Dynamic Programming. Maintain [dp], where dp[i] represents the number of combination that sum up to [i].
+#              A sub-target [i] can be achieved from [i-n]. If dp[i-n] has "x" combination, then dp[i] has same. Because every 
+#              combination in dp[i-n] can be appended by [n] to sum up to [i]. Therefore, dp[i] = dp[i]+dp[i-n] for every dp[i-n]!=0.
+#              Iterate from 1 to [target] to find number of combinations that sum up to [i]. Iterate [n] in [nums] in inner loop, to
+#              accumulate combination of dp[i]. Return dp[target] as the number of combination to sum up to [target]
+# Time complexity: O(len(nums)*target)
+def combinationSum4(nums: List[int], target: int) -> int:
+    dp = [1]+[0 for _ in range(target)]          # dp[0] must be 1, otherwise nothing can be added to [dp]
+    for curTarget in range(target+1):
+        for n in nums:
+            if n<=curTarget:
+                dp[curTarget] += dp[curTarget-n]        # adding [n] to dp[curTarget-n] sum up to [curTarget].
+    return dp[-1]
+
+# 105.823 Binary Trees With Factors ======================================== https://leetcode.com/problems/binary-trees-with-factors/
+# Problem: Given an integer array [arr], where each element is strictly greater than 1. Make binary tree with only elements of [arr], 
+#          where a non-leaf node is equal to the product of both children. Return the number of binary trees can make. 
+#          Ex: [2,4,5,20] => 9 ways
+#              [2] = 2
+#              [4], [2,2,4] = 4
+#              [5] = 5
+#              [20], [4,5,20], [5,4,20], [2,2,5,20], [5,2,2,20] = 20
+#          The answer may be too large, return the answer modulo 10**9+7
+# Description: Dynamic Programming. Maintain [dp], where "keys" are elements [target] from [arr] and "values" are number of ways to 
+#              create tree with root of [target]. Sort [arr] in ascending order, and iterate through [arr]. For each iteration, find
+#              ways to reach [target]. In the inner loop, iterate from beginning to index [i]. For an element arr[j] and its complement 
+#              target//arr[j] also in [arr], then combination of dp[arr[j]]*dp[target//arr[j]] is the combination to mulitply to [target].
+#              At the last, sum of [dp] values is the total number of binary trees, mod it by 10**9+7 to get final result
+# Time complexity: O(N**2), N= len(arr)
+def numFactoredBinaryTrees(arr: List[int]) -> int:
+    arr = sorted(arr)
+    dp = {n:1 for n in arr}                 # [dp] initally all values are 1
+    for i, target in enumerate(arr):            # outer loop, iterate all elements in [arr] to be [target]
+        for j in range(i):                          # inner loop, iterate up to [i], since elements after [i] are larger then [target]
+            if target%arr[j] == 0 and target//arr[j] in dp:         # find arr[j] and its complement that multiply to [target]
+                dp[target] += dp[target//arr[j]]*dp[arr[j]]         # [target] is equal to number of combination
+    return sum(dp.values()) % (10**9+7)
+
+# 106.179 Largest Number ================================================================= https://leetcode.com/problems/largest-number/
+# Problem: Given a list of non-negative integers [nums]. Arrange them such that they form the largest number and return it in String form
+# Description: Sort with customized Comparison. Implement "compare" method to compare two [n1] and [n2], who should come first. Compare
+#              [n1+n2] and [n2+n1], the bigger one comes first. Implement sort algorithm leverage "compare" method. In this case, merge
+#              sort is used.
+# Time complexity: O(nlogn)
+class LargestNumber:
+    def compare(self, n1, n2):                          # compare method, that compare two numbers, who should come first
+        return str(n1)+str(n2)>str(n2)+str(n1)
+    
+    def partition(self, nums, left, right):             # split [nums] from middle
+        if left>right: 
+            return
+        elif left == right:
+            return [nums[left]]
+        mid = (right-left)//2+left                      # mid is [left+len//2]
+        leftArr = self.partition(nums, left, mid)           
+        rightArr = self.partition(nums, mid+1, right)
+        return self.merge(leftArr, rightArr)
+    
+    def merge(self, leftArr, rightArr):
+        res, left, right = [], 0, 0
+        while left<len(leftArr) and right<len(rightArr):
+            if self.compare(leftArr[left], rightArr[right]):        # Leverage "compare" method, larger number comes first
+                res.append(leftArr[left])
+                left += 1
+            else:
+                res.append(rightArr[right])
+                right += 1
+        if left < len(leftArr):
+            res += leftArr[left:]
+        if right < len(rightArr):
+            res += rightArr[right:]
+        return res
+
+    def largestNumber(self, nums: List[int]) -> str:
+        res = self.partition(nums, 0, len(nums)-1)
+        return str(int("".join([str(ele) for ele in res])))     # Remove leading zeros, by converting [res] to int then convert to str
+
+# 107.187 Repeated DNA Sequences ================================================ https://leetcode.com/problems/repeated-dna-sequences/
+# Problem: Given a DNA sequence [s] with letters "A", "C", "G" and "T". Find all ten-letter-long sequence(substring) that occur more than
+#          once. Answer can be returned in any order
+# Description: Slide window with counter. Iterate through [s], look at 10-letter substring at a time, while record occurence of substrings.
+#              At the end of iteration, if a substring's count is greater than 1. Then add it to result
+# Time complexity: O(N)
+def findRepeatedDnaSequences(s: str) -> List[str]:
+    record = defaultdict(int)
+    for i in range(len(s)-9):
+        record[s[i:i+10]] += 1                          # record occurence of substring
+    return [seq for seq in record.keys() if record[seq]>1]        # return substring [seq] if it's counter is larger than 1
+
+# 108.622 Design Circular Queue =================================================== https://leetcode.com/problems/design-circular-queue/
+# Problem: Implement a circular queue with fixed capacity. Circular queue is a linear data structure performs FIFO. 
+#          Implement following methods
+#          1. MyCircularQueue(k), k is the capacity of queue
+#          2. Front() -> int, Return the front item, if queue is empty return -1
+#          3. Rear() -> int. Return the last item, if queue is empty return -1
+#          4. enQueue(val) -> bool. Insert val to the end of queue, return True if succeed, return False if failed
+#          5. deQueue() -> bool. Delete last element from queue, return True if suceed, return False if failed
+#          6. isEmpty() -> bool. Check queue is empty or not
+#          7. isFull() -> bool. Check queue is full or not
+# Description: List with [head] and [tail] index pointers. Inital a list with [k] elements. [head] is 1 and [tail] is -1, to indicate
+#              an empty queue. [head] and [tail] should be set to 0 and -1 when deQueued to empty. The size of queue is calculated from
+#              size = (tail+1-head)%capacity.
+class MyCircularQueue:
+    def __init__(self, k: int):
+        self.data = [0] * k
+        self.capacity = k
+        self.head = 0
+        self.tail = -1
+        
+    def enQueue(self, val: int) -> bool:
+        if self.isFull(): return False
+        else:
+            self.tail = (self.tail+1)%self.capacity     # Move [tail] when enQueue
+            self.data[self.tail] = val
+        return True
+        
+    def deQueue(self) -> bool:
+        if self.isEmpty(): return False
+        if self.head == self.tail:              # reset [head] and [tail], when deleting to empty
+            self.head, self.tail = 0, -1
+            return True
+        self.head = (self.head+1)%self.capacity         # Move [head] when deQueue
+        return True
+
+    def Front(self) -> int:
+        if self.isEmpty(): return -1
+        return self.data[self.head]
+
+    def Rear(self) -> int:
+        if self.isEmpty(): return -1
+        return self.data[self.tail]
+
+    def isEmpty(self) -> bool:
+        return self.tail == -1
+
+    def isFull(self) -> bool:               # when queue is full, size is modulo of capacity. Use isEmpty() to exclude corner case
+        return not self.isEmpty() and (self.tail+1-self.head) % self.capacity == 0    
+
+# 109.658 Find K Closest Elements From Sorted Array =========================== https://leetcode.com/problems/find-k-closest-elements/
+# Problem: Given a sorted integer array [arr], and two integers [k] and [x]. Find [k] consecutive numbers that are the cloest to 
+#          [x] within [arr]. The returned array should also be sorted in ascending order. Always take the smaller number, when there
+#          is a tie between two numbers in [arr]
+# Desciption: Binary search with Sliding window. Binary search for [x] in [arr], meanwhile maintain a slide window of size [k]. For 
+#             each search, consider [mid] is the left-most element of sliding window and [mid+k] is the right-most element.
+#             Here are several considtions to shift [left] and [right] after compare [mid], [mid+k] with [x]
+#             1. x <= mid: Sliding window doesn't include [x], shift left
+#             2. mid+k <= x: Sliding window doesn't include [x], shift right
+#             3. mid < x < mid+k: there are two sub condistions
+#               3.1: x-mid < [mid+k]-x: [x] is closer to [mid], shift left
+#               3.2 x-mid > [mid+k]-x: [x] is closer to [mid+k], shift right
+#             When shifting [right] make it [mid+1], when shifting [left] make it [mid]. At the end of loop, [left] will be the left
+#             end of sliding window. Return [arr] between [left] and [left+k]
+# Time complexity: O(logN)
+def findClosestElements(arr: List[int], k: int, x: int) -> List[int]:
+    left, right = 0, len(arr)-k
+    while left < right:
+        mid = (left+right)//2
+        if x<=arr[mid]:                     # [x] is to the left of window, shift left
+            right = mid
+        elif arr[mid+k]<=x:                 # [x] is to the right of window, shift right
+            left = mid+1
+        elif x-arr[mid] > arr[mid+k]-x:     # [x] is closer to [mid+k], shift right
+            left = mid + 1
+        else:                               # [x] is closer to [mid], shift left
+            right = mid
+    return arr[left:left+k]
+
+# 110.1239 Maximum Length of a Concatenated String with Unique Characters === https://leetcode.com/problems/maximum-length-of-a-concatenated-string-with-unique-characters
+# Problem: Given an array of string [arr]. A string [s] is formed by concatenate of one or more elements of [arr] that only contains
+#          unique characters. Return the maximum length of [s]
+# Description: Dynamic programming. Maintain a [dp] where an element of [dp] is a concatenation of unique characters. Iterate through 
+#              [arr], for each element [ele], check if [ele] can form new candidate [s] with element of [dp]. To check uniqueness of
+#              character, use set() intersection operator. If intersetion is not empty, then character is not unique. Use set() union
+#              to concadinate [ele] and [s]. At the end, find the [s] in [dp] with maximum length
+# Time complexity:O(2^n), for each [ele] there are two choices, pick or not pick. There are 2^n possible [s]
+def maxLength(arr: List[str]) -> int:
+    dp = [set()]
+    for ele in arr:
+        eleSet = set(ele)
+        if len(ele) != len(eleSet): continue            # detect duplicates within an [ele]
+        for s in dp:
+            if s & eleSet: continue                     # duplicates found
+            else:
+                dp.append(s | eleSet)                   # no duplicates, concate [s] with current [ele]
+    return max([len(candidate) for candidate in dp])
+
+# 111.1339 Maximum Product of Splitted Binary Tree ======================= https://leetcode.com/problems/maximum-product-of-splitted-binary-tree/
+# Problem: Given the [root] of a binary tree, split the binary tree into two subtrees by breaking one edge, such that the  production of the sums
+#          of two subtrees is maximum. Return the maximum sum. if sum overflow, return its modulo of 10**9+7
+# Description: Calculate sum of entire tree [total], and calculate sum of each subtree, save in [sums]. An element of [sums] is sum of one part,
+#              [total-element] is sum of the other part. Multiple them and find maximum.
+# Time complexity: O(N), where N is number of edges
+def maxProduct(root: Optional[TreeNode]) -> int:
+    sums = set()
+    def helper(node):
+        if not node: 
+            return 0
+        subSum = helper(node.left)+helper(node.right)+node.val
+        sums.add(subSum)
+        return subSum
+    total = helper(root)
+    return max([total*(total-val) for val in sums]) % 1_000_000_007
+
+# 112.279 Perfect Square ===================================================================== https://leetcode.com/problems/perfect-squares
+# Problem: Given an integer [n], return the least number of perfect square number that sum up to [n].
+#          Perfect square numbers are is a square of an integer number, such as 1, 4, 9, 16
+# Description: Dynamic Programming. Craete a list with [n+1] element [dp], where dp[i] is the least number of perfect square
+#              numbers that sum up to [i]. Initially, dp[0] = 0 and dp[i] = i. Because the worst case senario, i = 1*i.
+#              For each [i], try to find [squares] that less than [i], and update dp[i] by min(dp[i], 1+dp[i-square]).
+#              return dp[-1] at the end, as the least number of perfect square that sum up to [i]
+# Time complexity: O(NlogN)
+def numSquares(n):
+    dp = [i for i in range(n+1)]
+    for i in range(n+1):
+        j = 0
+        while j*j <= i:
+            square = j*j                            # find perfect [square] that less than [i]
+            dp[i] = min(dp[i], 1+dp[i-square])      # find less number that sum up to [i]
+            j += 1
+    return dp[-1]
+
+# 113.841 Keys and Rooms ================================================================= https://leetcode.com/problems/keys-and-rooms/
+# Problem: There are [n] rooms, all rooms are locked except first room. Each room may or may not contain several keys, each key has a 
+#          number on it, that can unlock corresponding rooms. Given an array [rooms], each element of [rooms] is an array that represent
+#          [keys] in this room. Return True if can visit all rooms, return False otherwise
+# Description: DFS. Maintain a set [visited] denote rooms that are visited. Starting from room 0, recursivly visit keys in current room.
+#              Add room number to [visited] if not visited before. If all rooms are visited, [visited] should has same size of [rooms].
+# Time complexity: O(N), where N is number of sub-element in [rooms]
+def canVisitAllRooms(rooms: List[List[int]]) -> bool:
+    visited = set([0])                  # initally only room 0 is visited
+    def visit(keys):
+        for key in keys:                    # recursivly visit keys in current room
+            if key not in visited:
+                visited.add(key)
+                visit(rooms[key])
+    visit(rooms[0])                    # start from room 0, and DFS
+    return len(visited)==len(rooms)
+
+# 114.300 Longest Increasing Subsequence ===================================== https://leetcode.com/problems/longest-increasing-subsequence
+# Problem: Given an integer array [nums], return the length of longest strictly increasing subsequence(LIS).
+#          Subsequence is a sub-array that can be derived from another array by removing some or no elements, without changing order
+# Description: Dynamic Programming. Create an array [dp], where each element represent the LIS that starting from [i] to the end of [nums].
+#              Construct [dp] from right to left, dp[-1] is always 1, because there only one element to the end. Iterate [nums] towards
+#              left, and for each iteration, find all elements to the right of [i] that are greater than nums[i]. nums[i] can be prepended
+#              the that subsequence, therefore dp[i] will be the largest among possible subsequence. If no element is greater than nums[i],
+#              nums[i] itself will be a subsequence, so that dp[i] = 1. At the end of iteration, find the maximum in [dp]
+# Time complexity: O(N**2)
+def lengthOfLIS_dp(nums: List[int]) -> int:
+    dp = [1]*len(nums)
+    for i in reversed(range(len(nums)-1)):          # iterate nums from right to left
+        for j in range(i+1, len(nums)):                 # find element from nums[i:] that is greater than nums[i]
+            if nums[i]<nums[j]:                         
+                dp[i] = max(dp[i], dp[j]+1)                 # find longest among subsequences
+    return max(dp)
+
+# Description: Greedy with binary search. Create [res] as result subsequence. Adding element to the end of [res] if greater than any of [res],
+#              use binary search to substitue a larger element in [res] if a smaller element is found. It can reduce value of [res] as much
+#              as possible, and enlarge buffer to add more elements to [res]
+# Time complexity: O(NlogN)
+from bisect import bisect_left
+def lengthOfLIS_greedy(nums: List[int]) -> int:
+    res = []
+    for num in nums:
+        if len(res)==0 or res[-1]<num:          # append large element to right
+            res.append(num)
+        else:
+            index = bisect_left(res, num)       # substitute larger element in [res] with smaller (with binary search)
+            res[index] = num
+    return len(res)
+
+# 115.207 Course Schedule ================================================================== https://leetcode.com/problems/course-schedule
+# Problem: There are [numCourses] courses labeled from 0 to [numCourses-1]. Given an array of [prerequisites], where each element is
+#          prerequisites[i] = [a, b], that b is the prerequisite of a, meaning you must take b before taking a.
+#          Return True if all courses in [numCourses] can be finished, otherwise return False
+# Description: DFS with vistied memory. Create a [graph], [i]th course's prerequisites is at graph[i]. Create a [visited], elements can 
+#              take three values, 0 is not visited, 1 is visited meaning can be finished, -1 is currenting visiting, visiting a course
+#              that is being visited indicates a loop, which means a course can't be finished.
+#              In DFS, if graph[i] = -1, return False because of loop. If graph[i] = 1, return True because course [i] can be finished.
+#              If graph[i] = 0, course [i] is not checked. Then set visited[i] = -1 as being visited, and DFS on course [i]. If any of
+#              the prerequisites of course [i] returns False, then course [i] can't be finished return False. If all of its prerequisies
+#              return True, set visited[i] = 1 as it can be finished.
+#              DFS starting from every course of [nunmCourses], if all of them return True, then all courses can be finished. Otherwise
+#              return False
+# Time Complexity: O(N)
+def canFinish(numCourses: int, prerequisites: List[List[int]]) -> bool:
+    graph = [[] for i in range(numCourses)]         # graph represents courses and their prerequisites
+    visited = [0 for i in range(numCourses)]        # initially all courses are not visited
+    for course, prerequisite in prerequisites:      # populate [course]s and their [prerequisite]s
+        graph[course].append(prerequisite)
+
+    def dfs(course):
+        if visited[course] == -1:       # course is being visited, loop detected
+            return False
+        elif visited[course] == 1:        # course is checked and can be finished
+            return True
+        else:                              # course if not check
+            visited[course] = -1                # mark [course] as being visited
+            for pre in graph[course]:           # check [pre] of course, course can't be finished if any of its [pre] can't be finished
+                if not dfs(pre):                    
+                    return False
+        return True
+
+    for course in range(numCourses):        # check every course
+        if not dfs(course):
+            return False
+    return True
+
+# 116.139 Word Break =============================================================================== https://leetcode.com/problems/word-break/
+# Problem: Given a string [s] and a word collection [wordDict], return True if [s] can be segemented into a sequence of one or more words from
+#          [wordDict]. The same word from [wordDict] can be reused
+# Descritpion: Dynamic Programming. Create a [dp] of Boolean array, dp[i] represent s[:i] can be segemented with [wordDict]. dp[0] is always 
+#              True, and dp[i] can be derived by checking if any [word] of [wordDict] is the segement that come after index [i], meaning 
+#              [word] == s[i-len(word):i]. While if dp[i-len(word)] is True. Then dp[i] can be set to True.
+#              If [s] can be segemented into [wordDict], dp[-1] should be True. Return dp[-1] at the end
+# Time complexity: O(N*M), N=len(s), M=len(wordDict) 
+def wordBreak(s: str, wordDict: List[str]) -> bool:
+    dp = [True]+[False]*len(s)                      # dp[i] represent whether s[0:i] can be segemented or not
+    for i in range(1, len(s)+1):
+        for word in wordDict:
+            if dp[i-len(word)] and s[i-len(word)] == word:
+                dp[i] = True
+    return dp[-1]
+
+# 117.210 Course Schedule II ============================================================== https://leetcode.com/problems/course-schedule-ii/
+# Problem: Given a total of [numCourses] courses that need to be taken, labeled from 0 to [numCourses-1]. Given an array of [prerequisites],
+#          each element is prerequisites[i] = [a, b], that must take course "b" before taking course "a". Return the ordering of courses that
+#          you should take to finish all given courses. If many possible orders, return any of them. If not possible to finish, return empty
+#          list.
+# Description: Graph with DFS. Maintin [prerequisites] is an adjacency list, where indecis are number of courses, and elements are prerequisites
+#              of each course. Maintain a [visited] set to track if a course can be finished. "0" => not checked, "1" => can be finished, and 
+#              "-1" => currently checking. If a "-1" course is visited twice, then a loop is detected the courses in a loop can't be finsihed.
+#              Use DFS trace down all courses, keep visiting "unchecked" course. If a course can be finished, add it to [res] list, and return
+#              True. If a "-1" course is visited twice, return False to indicate current path can't be finished. If a course is visited first
+#              time, and its prerequisites are undetermined, DFS on its prerequisites, and if any prerequisites return False, this course will
+#              return False.
+# Time Complexity: O(m+n), m: number of courses, n: number of edges
+def findOrder(numCourses: int, prerequisites: List[List[int]]) -> List[int]:
+    # maintain adjacency list
+    graph = [[] for _ in range(numCourses)]
+    for cor, pre in prerequisites:
+        graph[cor].append(pre)
+
+    visited = {k:0 for k in range(numCourses)}
+    res = []
+    def dfs(course):
+        if visited[course] == -1:         # loop detected when a course is visited twice
+            return False
+        if visited[course] == 1:          # course is checked, and can be finished
+            return True
+        visited[course] = -1            # start visiting a unvisited course, check its prerequisites
+        for pre in graph[course]:
+            if not dfs(pre):                # if any prerequisites can't be finished, current couse return False
+                return False
+        res.append(course)              # current course can be finished, and add to [res]
+        visited[course] = 1             # denote a course as checked
+        return True
+
+    for course in range(numCourses):        # check all course 
+        if not dfs(course):                     # if any course can't be finished
+            return []
+    return res
+
+# 118.238 Product of Array Except Self ============================== https://leetcode.com/problems/product-of-array-except-self/description/
+# Problem: Given an array [nums], return an array [res] such that res[i] is the production of all elements in [nums] expect nums[i]
+#          write an algorithm runs in O(n) and without using division
+# Desciption: Maintain two lists, [preList] that contains the accumulated production of [nums] from left to right, and [postList] that contains
+#             the accumulated production from right to left. When calculating res[i], it is the production of preList[i] * postList[i].
+#             Because, preList[i] is the production of elements to the left of nums[i], and postList[i] is the production of elements to 
+#             the right of nums[i].
+#             Note: when calculatiing [preList] and [postList], the index are shifted accordingly, so that preList[i] is production of nums[:i]
+#             and postList[i] is production of nums[i+1:]
+# Time complexity: O(N)
+# Space complexity: O(N)
+def productExceptSelf(nums: List[int]) -> List[int]:
+    preList, postList = [1 for _ in nums], [1 for _ in nums]
+    for i in range(1, len(nums)):               
+        preList[i] = preList[i-1]*nums[i-1]     # shift index to left
+    for i in range(len(nums)-2, -1, -1):
+        postList[i] = postList[i+1]*nums[i+1]   # shift index to right
+    res = []
+    for i in range(len(nums)):
+        res.append(preList[i]*postList[i])
+    return res
+
+# Description: Maintain a List [res] that contains accumulated production of [nums] from left to right. The index is shifted to right so that 
+#              res[i] has accumulated production of nums[:i]. Iterate [nums] from right to left, while tracking the accumulated production [post], 
+#              whose initial value is 1. Example
+#                               1  2  3  4
+#                     res       1  1  2  6  
+#               post = 1                 6  
+#               post = 1*4            8  6
+#               post = 1*4*3       12 8  6
+#               post = 1*4*3*2  24 12 8  6
+# Time Complexity: O(N)
+# Space Complexity: O(1), if output space doesn't count
+def productExceptSelf(nums: List[int]) -> List[int]:
+    res = [1]
+    for i in range(1, len(nums)):           # calculate accumulated from left to right, with index shifted to right by 1
+        res.append(res[i-1]*nums[i-1])
+    post = 1
+    for i in range(len(nums)-1, -1, -1):    # iterate from right to left, and tracking accumulated production
+        res[i] *= post
+        post *= nums[i]
+    return res
+
+# 119.221 Maximal Square  ========================================================== https://leetcode.com/problems/maximal-square/description/
+# Problem: Given a m*n [matrix] with "0"s and "1"s. Find the largest square contains only "1"s and return its area
+# Description: Dynamic Programming. Maintain a 2D list [dp] with one more row and column than [matrix], where the first row and column represent
+#              the initial state, dp[i+1][j+1] represent the maximal area at matrix[i][j]. The value at dp[i+1][j+1] depends on the cell on top 
+#              (dp[i-1][j]), to the left (dp[i][j-1]) and up left (dp[i-1][j-1]). If matrix[i][j] == 0, it's not possible to form a square at 
+#              this cell, then dp[i+1][j+1] = 0. If matrix[i][j]==1, dp[i+1][j+1] = min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]) + 1. Which means,
+#              there are already three squares to left, up and up-left, adding a cell at [i+1][j+1] can form a bigger square.
+# Time Complexity: O(m*n)
+def maximalSquare(matrix: List[List[str]]) -> int:
+    dp = [[0 for _ in range(len(matrix[0])+1)] for _ in range(len(matrix)+1)]       # dp memory
+    res = 0
+    for i in range(1, len(matrix)+1):
+        for j in range(1, len(matrix[0])+1):
+            if matrix[i-1][j-1] == "1":
+                dp[i][j] = min(dp[i-1][j], dp[i-1][j-1], dp[i][j-1])+1              # form a bigger square
+                res = max(res, dp[i][j])                               # track current maximum
+    return res**2
+
+# 120.323 Number of Connected components in a undirected graph =============== https://www.youtube.com/watch?v=8f1XPm4WOUc&list=PLot-Xpze53lfOdF3KwpMSFEyfE77zIwiP&index=41
+# Problem: Given a graph of [n] nodes by giving an ingteger [n] and an array of [edges], where each edge edges[i] = [ai, bi], indicates there
+#          is an edge between node ai and bi. Return the number of connected component in the graph
+# Description: UnionFind. Maintain an array [parent] of [n] elements, representing the "root" ancestor of each node. Initially it will be [0, 1, 2, ... , n-1], meaning 
+#              each node is the parent of themselves. Maintain an array [rank] of [n] elements, represent the size connected components that the node is part of. Initally,
+#              there are all ones in [rank], that each node is the parent of themselves. 
+#              Iterate through [edges], for two nodes [n1] and [n2] in the edge. Find the root ancestor of both nodes by seaching [parent] array. If they have same ancetsor
+#              they are already connected, no merging is needed. Otherwise, compare the [rank] of both nodes. The node has smaller rank will be merged to the other one. 
+#              Update parent of the node with smaller [rank], and update [rank] of new parent node. Maintain the number of connected component [res], intially [n] since all 
+#              nodes are disconnected. When a merge is done, decrease [res] by 1 because a disconnected node becomes part of connected component
+# Time Complexity: O(v+e), number of vector and edges
+def countComponents(n: int, edges: List[List[int]]) -> int:
+    parent = [i for i in range(n)]
+    rank = [1 for _ in range(n)]
+    # find the root ancestor of [node]
+    def findParent(node):             
+        res = node
+        while res != parent[res]:   # when a node is parent of itself. the root is found
+            res = parent[res]
+        parent[node] = res          # update the ancestor of [node]
+        return res
+    # union two nodes
+    def union(node1, node2):
+        parent1, parent2 = findParent(node1), findParent(node2)     # find parent of both node
+        if parent1 == parent2:      # two nodes already connected, no merge needed
+            return 0
+        if rank[parent1]>rank[parent2]:         # [parent1] has higer rank, [parent1] should be parent of [parent2]
+            parent[parent2] = parent1
+            rank[parent1] += rank[parent2]
+        else:                               # [parent2] has higher rank, [parent2] should be parent of [parent1]
+            parent[parent1] = parent2
+            rank[parent2] += rank[parent1]
+        return 1
+    
+    res = 0
+    for node1, node2 in edges:
+        res -= union(node1, node2)
+    return res
+
+# 121.547 Number of Provinces =========================================================== https://leetcode.com/problems/number-of-provinces/description/
+# Problem: Given a n*n matrix [isConnected], where isConnected[i][j]=1 if city "i" is connected to city "j", and isConnected[i][j]=0 if city "i" and city
+#          "j" is not connected. Return the total number of "provinces", that a "province" is a group of cities that cities form a connected component 
+# Description: UnionFind. Maintain a list [parent] with same size of cities, representing the root parent of each cities. Initially [0,1,2, ... ,n-1], 
+#              meaning no cities has been connected and they are parent of themselves. Create a methond "find(city)", that trace back [parent] list to
+#              find root parent of [city]. Create a method "union(city1, city2)", that connect [city1] and [city2] if they are connected by an edge.
+#              "union" method, looks up root parents of [city1] and [city2] by using "find". If both return same parent then city1 and city2 are already
+#              connected. Otherwise, update city2'parent to be city1's parent, as city1 and city2  are connected and should share same root parent.
+#              Maintain the nunmber of province [res], intially as number of cities, as none of them are conneced. Union method return 1 if a connected 
+#              is established, otherwise return 0. Return value subtract [res] to track the current number of province.
+#              Iterate [isConnected], if isConnection[i][j] == 1, try union them by union(i, j)
+# Time Complexity: O(v+e), number of vector and edges
+def findCircleNum(isConnected: List[List[int]]) -> int:
+    parent = [i for i in range(len(isConnected))]           # parent lookup, initally no city is connected, they are parents of themselves
+    # loopup root parent of [node]
+    def findParent(node):                 
+        while node != parent[node]:     
+            node = parent[node]
+        return node
+    # try union [city1] and [city2]
+    def union(city1, city2):            
+        parent1 = findParent(city1)
+        parent2 = findParent(city2)
+        if parent1 == parent2:          # city1 and city2 already connected
+            return 0
+        else:
+            parent[parent1] = parent2   # connect city1 and city2, by updating one of the root parent to another root parent
+            return 1
+    res = len(isConnected)      # track number of province, initally each city is a province
+    # iterate through isConnected
+    for i in range(len(isConnected)):
+        for j in range(1, len(isConnected)):
+            if isConnected[i][j] == 1:          # find two connected cities [i][j], and try union
+                res -= union(i, j)              # reduce number of province if [i] and [j] is connected
+    return res  
+
+# 122.1041 Robot Bounded In Circle ======================================================= https://leetcode.com/problems/robot-bounded-in-circle/description/
+# Problem: Given a robot starting at location [0, 0] and fact north. The robot receives one of three instructions at a time.
+#          "G" move forward by 1 unit
+#          "L" turn 90 degrees to left
+#          "R" turn 90 degrees to right
+#          The robot perform [instructions] given in order, and repeat the forever. Return True if and only if there exists a circle, such that the robot
+#          never leaves the circle
+# Desciption: If there exists a circle, the robot must execute the instruction once or twice or four times to create the circle. Because, if the [instructions]
+#             create the circle by itself, robot execute it once. If the robot facing south after executing [instructions] once, the robot went through half of
+#             the circle, and execute it again will form a complete circle. If the robot facing east or west after executing [instructions] once, the robot went
+#             through a quarter of the circle, execute the [instructions] three more time will form a complete circle.
+#             Execute [instructions] once, twice, and four time. Return True if any of the executions form a circle
+# Time complexity: O(N)
+def isRobotBounded(instructions: str) -> bool:
+    def execute(instructions, i, j, d):
+        directions = [[0,1],[1,0],[0,-1],[-1,0]]        # indicate directions for easy movement
+        for ins in instructions:
+            if ins == "G":
+                i += directions[d][0]
+                j += directions[d][1]
+            elif ins == "L":
+                d = (d-1)%4
+            elif ins == "R":
+                d = (d+1)%4
+        if i == 0 and j == 0:
+            return True
+        else:
+            False
+    # executre [instructions] once, twice or four times
+    return execute(instructions, 0, 0, 0) or execute(instructions*2, 0, 0, 0) or execute(instructions*4, 0, 0, 0)
+
+# Desciption: Based on previous method, if the robot facing south, east or west after executing [instructions] once. It will form a circle eventually. 
+#             Therefore, execute [instruction] once and check if robot return the starting point, or it is facing north. 
+# Time complexity: O(N)
+def isRobotBounded_2(instructions: str) -> bool:
+    directions = [[0,1],[1,0],[0,-1],[-1,0]]
+    i = j = d = 0               # [d] tracks direction of robot
+    for ins in instructions:
+        if ins == "G":
+            i += directions[d][0]
+            j += directions[d][1]
+        elif ins == "L":
+            d = (d-1)%4
+        elif ins == "R":
+            d = (d+1)%4
+    if i == 0 and j == 0:       # check robot return to starting point
+        return True
+    elif d != 0:                # check robot is NOT facing north
+        return True
+    return False
+
+# 123.417 Pacific Atlantic Water Flow ===================================================== https://leetcode.com/problems/pacific-atlantic-water-flow/
+# Problem: Given an island as a m*n matrix, where Pacific Ocean is at its top and left borders, and Atlantic Ocean touches its right and bottom borders.
+#          A cell "height[i][j]"" reprents the height above sea leave of an area, and water can flow from high area to low area. Assume the island 
+#          receives rain and rain water flow to neighboring cell directly north, south, east or west if the neighboring cell's height is lower or 
+#          equals to the current cell's height. When water reaches border, it can flow to ocean.  Return a 2D list of coordinates [results], where
+#          results[i] = [ri, ci] denotes that the rain can flow from [ri, ci] to both Pacific Ocean and Altantic Ocean
+# Description: Starting from Pacific Ocean and Altantic Ocean, use DFS to search for cells that can reach each Ocean, the intersection of them is [results]
+#              In DFS, pass current coordinate, previous height, and a set of cell that are reachable. If current coordiante is visited, or out of boundary 
+#              skip it. If current height is higher than previous height, current cell can flow to Ocean. Add it to reachable list, and DFS its four neighbors. 
+#              DFS Pacifica Ocean and Atlantic Ocean separately. For cell flow to Pacific Ocean, maintain a set [toPO], DFS starting from first row and first 
+#              column. For cell flow to Atlantic Ocean, maintain a set [toAO] and DFS starting from last row and last column. Return intersection of [toPO] and
+#              [toAO] 
+# In Short: Start from two oceans to find cell can reach each of them and take intersection
+# Time Complexity: O(N)
+def pacificAtlantic(heights: List[List[int]]) -> List[List[int]]:
+    ROWS, COLS = len(heights), len(heights[0])
+    def dfs(i, j, preHeight, visited):
+        if (i,j) not in visited and 0<=i<ROWS and 0<=j<COLS and heights[i][j]>=preHeight:
+            visited.add((i, j))
+            dfs(i+1, j, heights[i][j], visited)
+            dfs(i-1, j, heights[i][j], visited)
+            dfs(i, j-1, heights[i][j], visited)
+            dfs(i, j+1, heights[i][j], visited)
+        
+    toAO, toPO = set(), set()
+    for i in range(len(heights)):
+        dfs(i, 0, 0, toPO)
+        dfs(i, COLS-1, 0, toAO)
+    for j in range(len(heights[0])):
+        dfs(0, j, 0, toPO)
+        dfs(ROWS-1, j, 0, toAO)
+    
+    return list(toAO & toPO)
+
+# 124.560 Subarray Sum Equals K =================================================================== https://leetcode.com/problems/subarray-sum-equals-k/
+# Problem: Given a list of [nums] and a integer [k]. Return total number of subarray that sum up tp [k]
+# Description: The sum of a substring from i to j (sum[i:j]) is total sum of 0 to j (sum[0:j]) minues the sum of previous subarray from 0 to i (sum[0:i]). 
+#              Itearte through [nums], keep tracking the [preSum] sum[0:i] and its number of occurance. For each iteration, the [curSum] is sum[0:i],
+#              check if exists a [preSum] that [curSum]-[preSum]==[k]. Then the number of occurance of [preSum] is the number of subarray that sum up to [k]
+# In Short: Track sum of subarry from 0 to i as [preSum] and its occurance, check if exists a [preSum] that [k] = [currentSum] - [previousSum]. 
+def subarraySum(nums: List[int], k: int) -> int:
+    preSums = defaultdict(int)
+    preSums[0] = 1               # preSum=0 for subarray starting from index 0
+    res = curSum = 0
+    for n in nums:
+        curSum += n
+        if curSum-k in preSums:             # check if exists a preSum = curSum-k
+            res += preSums[curSum-k]
+        preSums[curSum] += 1                # add curSum to preSum, as it becomes previous subarray for later iteration
+    return res
+
+# 125.1466 Reorder Routes to Make All Paths Lead to the City Zero ===== https://leetcode.com/problems/reorder-routes-to-make-all-paths-lead-to-the-city-zero/
+# Problem: Given [n] cities from 0 to n-1, and n-1 ways such that there is only one way connects between two cities. Roads are represented by list [connections]
+#          where connects[i] = (city_1, city_2) meaning you can travel from city_1 to city_2, but not the other way around. Reorder the dicrection of roads,
+#          such that all cities can reach city 0, return the number of roads need to be redirected.
+# Description: Maintain a city-neighbors Map, and Depth first search. Iterate through [connections], if a road connects city_1 and city_2, then note in Map 
+#              that city_1 is a neighbor of city_2 and city_2 is a neighbor of city_1. 
+#              DFS starting from city_0, check neighbor of city. If there exists a road in [connections] that is from city to a un-visited neighbor, then this
+#              road need to be redirected. DFS on neighbors of city, and denote city as visited.
+# Time Complexity: O(N)
+def minReorder(n: int, connections: List[List[int]]) -> int:
+    conn = set((i,j) for i,j in connections)
+    # create city-neighbors map
+    neibors = {city: [] for city in range(n)}
+    for i, j in connections:
+        neibors[i].append(j)
+        neibors[j].append(i)
+    res = 0
+    visited = set()
+    def dfs(city):
+        nonlocal res
+        if city in visited:
+            return
+        visited.add(city)       # mark [city] as visited
+        for neibor in neibors[city]:
+            if neibor not in visited and (city, neibor) in conn:
+                res += 1
+            dfs(neibor)
+    dfs(0)              # start dfs from city_0
+    return res
+
+# 126.1963 Minimum Number of Swaps to Make the String Balanced =============== https://leetcode.com/problems/minimum-number-of-swaps-to-make-the-string-balanced
+# Problem: Given a string of lenght [n] consists only opening and closing brackets, and number of opening or closing brackets are both [n/2]. The brackets might
+#          not be balanced, that there might not be a opening bracket comes before a closing bracket to pair with each other. You can swap any two indices any 
+#          number of times to make entire string balanced. Return the minimum number of swaps.
+# Description: Find un-paired closing bracket, and swap with opening bracket from end of string. Maintain s [stack] to track number of opening brackets that
+#              are un-paired. Iterate through [s]. If [i] is '[', increase [stack] as new "[" is found. If [i] is "]", try pair with "[" in [stack], 
+#                   if [stack] is non-zero, decrease [stack] by 1 to pair a closing with an opening
+#                   if [stack] is zero, no "[" can be paired, swap needed. Search from [end] of [s], and swap it with first "[" found. Denote a swap is perfromed,
+#                       and increase [stack] by 1, as a "[" is swapped to front. Also denote current location of [end], since next search with start from there
+# Time complexity: O(n)
+def minSwaps(s: str) -> int:
+    stack = 0
+    swaps = 0
+    end = len(s)-1
+    for bracket in s:
+        if bracket == "[":      # found "[", need to be paired later
+            stack += 1
+        else:                   # found "]"
+            if stack:               # check if "]" can be paired with a prior "[" 
+                stack -= 1
+            else:                   # no "[" can be paired, swap
+                while s[end] != "[":        # find a "[" from end of [s]
+                    end -= 1
+                stack += 1                  # a "[" is moved to front, and need to be paired later
+                swaps += 1                  # a swap is done
+    return swaps
+
+# 127.120 Triangle ==================================================================================================== https://leetcode.com/problems/triangle
+# Problem: Given a [triangle] array, return the minimum path sum from top to bottom. For each step, you may move to an adjacent cell of the lower level.
+#          A [triangle] is a 2-D array, that an element at index [i] is a sub-list that contains [i+1] element of integers
+# Desciption: Dynamic Programming. Move from bottom to top. Maintain a [dp] list, that tracks the minimum path sum at a cell of certain level. and is updated 
+#             every level. Initially, [dp] contains elements of bottom level. When moving upwards, the minimum path sum at index [i] at upper level is the 
+#             smaller path sum of adjacent cell at lower level, plus the number at index [i] of upper level, dp[i] = min(dp[i], dp[i+1])+n. At the end of 
+#             traversal, the minimum path sum is kept at dp[0]
+# Time complexty: O(N), N is number of numbers in [triangle]
+def minimumTotal(triangle: List[List[int]]) -> int:
+    dp = [n for n in triangle[-1]]          # Initially dp can be all zero and same size of triangle[-1]
+    for level in reversed(triangle[:-1]):       # traverse all levels, if dp are all zero initially
+        for i, n in enumerate(level):
+            dp[i] = min(dp[i], dp[i+1])+n       # update min at index [i] for a level
+    return dp[0]
