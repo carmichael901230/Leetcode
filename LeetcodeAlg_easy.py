@@ -1048,16 +1048,34 @@ def isHappy(n: int) -> bool:
 
 # 52.189 Rotate Array ======================================= URL: https://leetcode.com/problems/rotate-array/
 # PProblem: Given a array [arr] and an integer [k], modify [arr] in place by rotate the array to the right by k steps.
-# Description: If k is positive, then rotate array by k steps is equivalent to move the last k element to the beginning of array.
+# Description: Slicing list. If k is positive, then rotate array by k steps is equivalent to move the last k element to the beginning of array.
 #              Also, k may be negative number and |k| may greater than length of arr. In both case, let k = k%n.
 #              If k is greater than length, k%n can get rid of exceeded part. If k is negative, k%n can convert from rotate left by k
 #              rotate right by length-k. If k is negative and |k| > length, then k%n can first get rid of exceeded part and convert from
 #              rotate left to right.
+# Time complexity: O(N)
+# Space complexity: O(1)
 def rotate(nums: List[int], k: int) -> None:
-    if len(nums)<=1 or k == 0:          # early termination
-        return nums
-    rotates = k%len(nums)
-    nums[:] = nums[len(nums)-rotates:]+nums[:len(nums)-rotates]     # use "nums[:]" to deep copy
+    k = k%len(nums)
+    nums[:] = nums[-k:] + nums[:-k]     # use nums[:] for deep copy
+
+# Description: Reversing list. Reverse entire list of [nums], and reverse nums[:k] and nums[k+1:]. Example below
+#              [1,2,3,4,5] k=2
+#              rotate entire list => [5,4,3,2,1]
+#              rotate nums[:k]    => [4,5, 3,2,1]
+#              rotate nums[k+1:]  => [4,5, 1,2,3]
+# Time complexity: O(N)
+# Spece complexity: O(1)
+def rotate_2(nums: List[int], k: int) -> None:
+    # function that reverse elements between i and j in place
+    def reverse(i, j):
+        while i<j:
+            nums[i], nums[j] = nums[j], nums[i]
+            i, j = i+1, j-1
+    reverse(0, len(nums)-1)         # reverse entire array
+    k = k%len(nums)
+    reverse(0, k-1)                 # reverse first portion
+    reverse(k, len(nums)-1)         # reverse second portion
 
 # 52.190 Reverse Bits ========================================= URL: https://leetcode.com/problems/reverse-bits/
 # Problem: Given a 32 bit unsigned bitwise number, return the bitwise reversed number
@@ -3276,3 +3294,49 @@ def countBits(n: int) -> List[int]:
     for i in range(1,n+1):
         res.append(res[i//2]+i%2)       # [i] is combination of [i//2] and i%2
     return res
+
+# 157.279 Perfect Squares ============================================================= https://leetcode.com/problems/perfect-squares/
+# Problem: Given an integer [n]. Return the leaset number of perfect square number that sum up to [n].
+#          Perfect square number is an integer that is a square of an integer, ex 4=2^2, 9=3^2, 81=9^2 are perfect square numbers
+# Description: Dynamic Programming. For integer [n], the perfect squares can be used are 1 to sqrt(n), because number greater than
+#              sqrt(n) exceeds [n]. Thus, construct the candidate prefect squares as list [1^2, 2^2, 3^2, ... int(sqrt(n))^2].
+#              Crate a [dp] of size [n+1], index [i] represent the number of prefect squares to sum up to [i]. Index 0 is 0 and other
+#              index [i] can be [+inf] or [i] initially. Iterate through 1 to n+1, if [i] is greater or equal to a candidate prefect
+#              square [sq], there is a dp[i-sq] that adding [sq] sum up to [i]. Thus, dp[i] = min(dp[i], dp[i-sq]).
+#              After iteration, the dp[n] contains the number of perfect squares that sum up to n
+# Time complexity: O(N*sqrt(N))
+def numSquares(n: int) -> int:
+    sqr = int(n**0.5)
+    squares = [i**2 for i in range(1, sqr+1)]       # construct perfect square condidates
+    dp = [0] + [float("inf")]*n                     # inital dp
+    for i in range(1, n+1):
+        for sq in squares:
+            if i-sq >= 0:                               # a [sq] can be included to sum up to [i] 
+                dp[i] = min(dp[i], dp[i-sq]+1)
+    return dp[-1]
+
+# 158.178 Graph Valid Tree ===================================================================== https://www.lintcode.com/problem/178/
+# Problem: Given [n] nodes labeled from 0 to n-1, and a list of undirected [edges], each edge is a pair of nodes, represent an edge
+#          between two nodes. Write a function to check whether these edges make up a valid tree.
+#          A valid tree is an undirected graph where any two nodes are connected by exactly one edge
+# Desciption: DFS on adjacency matrix. By definiation of tree, a [n] nodes tree must has [n-1] edges. And the [n-1] edges should connect
+#             all nodes, such that all nodes will be visited after dfs the tree.
+#             Create an adjacency map to represent the undriected edges for DFS, and maintain a [visited] set to track visited nodes.
+#             After DFS, size of [visited] == n, that all nodes are visited
+# Time complexity: O(N)
+def valid_tree(n, edges):
+    if n==0 or n-1 != len(edges):           # [n] nodes has [n-1] edges
+        return False
+    adj = {i: [] for i in range(n)}         # create adjacency map
+    for edge in edges:
+        adj[edge[0]].append(edge[1])
+        adj[edge[1]].append(edge[0])
+    visited = set()
+    def dfs(node):                      # dfs on unvisited nodes
+        visited.add(node)
+        for child in adj[node]:
+            if child in visited:
+                continue
+            dfs(child)
+    dfs(0)
+    return len(visited) == n            # all nodes should be visited

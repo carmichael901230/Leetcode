@@ -3474,3 +3474,118 @@ def minimumTotal(triangle: List[List[int]]) -> int:
         for i, n in enumerate(level):
             dp[i] = min(dp[i], dp[i+1])+n       # update min at index [i] for a level
     return dp[0]
+
+# 128.347 Top K Frequent Elements =================================================================== https://leetcode.com/problems/top-k-frequent-elements/
+# Problem: Given an array [nums] and an integer [k], return the [k] most frequent elements. Must solve better than O(nlogn) time complexity
+# Description: Bucket Sort. Count frequence of each number, store number and its count in an array, where [index] is count/frequence and element is sub-list 
+#              that represent the numbers that has that count/frequence. The first [k] elements have biggest indeices are the [k] most frequent.
+# Time compleixty: O(N)
+def topKFrequent(nums: List[int], k: int) -> List[int]:
+    cnt = Counter(nums)
+    freq = [[] for _ in range(len(nums)+1)]     # frequence list of size len(nums)+1. Biggest possible frequence is len(nums)+1, where items in [nums] are identical
+    for key, val in cnt.items():
+        freq[val].append(key)           # load numbers to corresponding frequence
+    res = []
+    for i in reversed(range(len(freq))):        # iterate from right to left, to find elements have biggest frequence
+        if freq[i]:
+            res += freq[i]
+        if len(res) == k:               # return [res] when [k] elements are found
+            return res
+
+# 129.215 Kth Largest Element in an Array ======================================================= https://leetcode.com/problems/kth-largest-element-in-an-array/
+# Problem: Given an array [nums] and an integer [k]. Find the [k]th largest element in [nums]. It is the [k]th largest in sorted order, not [k]th distinct largest
+#          element. Solve it without sorting
+# Description: Heap. Maintain a min heap of size [k]. Iterate through [nums] and replace heap[0] once a larger element is found. At the end, heap will contain
+#              [k] largest element, and heap[0] is the [k]th largest.
+#              Heap: a binary tree represented by an array, where parent is larger(max heap)/small(min heap) than its children. 
+#              heap push: Insert at the end of array and pop up until a valid heap
+#              heap pop: remove heap[0] and replace by heap[-1], pop down heap[0] until a valid heap
+# Time complexity: O(klogn), need to heapify k times
+def findKthLargest(nums: List[int], k: int) -> int:
+    heap = nums[:k]
+    heapq.heapify(heap)
+    for n in nums[k:]:
+        if n>heap[0]:
+            heapq.heappop(heap)
+            heapq.heappush(heap, n)
+    return heap[0]
+
+# Description: Quick Select. Partition [nums] that smaller elements are on left side, and larger elements are on right side. Find the element at index [len(nums)-k], 
+#              By repeat partitioning, until pivot index is at [len(nums)-k], meaning the nunmber at index [len(nums)-k] is found, and it is the [k]th smallest number.
+#              Becase, when nums is in ascending order, which is [len(nums)-k]th smallest and [k]th largest.
+# Time Complexity: O(n)
+def findKthLargest(nums: List[int], k: int) -> int:
+    targetIndex = len(nums)-k       # index of kth largest in ascending order
+
+    def quickSelect(left, right):
+        pivot, p = nums[right], left
+        for i in range(left, right):                # partition 
+            if nums[i]<=pivot:
+                nums[i], nums[p] = nums[p], nums[i]
+                p += 1
+        nums[p], nums[right] = nums[right], nums[p]
+        if p == targetIndex:            # [p] index is the kth largest, target found
+            return nums[p]
+        elif p < targetIndex:           # targetIndex is to the RIGHT-side of pivot, search right partition
+            return quickSelect(p+1, right)
+        else:                           # targetIndex is to the LEFT-side of pivot, search right partition
+            return quickSelect(left, p-1)
+
+    return quickSelect(0, len(nums)-1)
+
+# 139.1888 Minimum Number of Flips to Make the Binary String Alternating ======= https://leetcode.com/problems/minimum-number-of-flips-to-make-the-binary-string-alternating
+# Problem: Given a string [s] representing binary number, consisting only "0" and "1". You are allowed to perform two types of opeartions in any sequences
+#          Type-1: Remove a character from beginning of [s] and append it to the end
+#          Type-2: Pick any index of [s] and flip the bit value
+#          Return the minimum number of Type-2 need to perform, such that bits in [s] become alternating, number of Type-2 doesn't count.
+# Description: Sliding window. There are two possible alterante results, one start with "0101", the other start with "1010". Create both of the results as [target_1] and
+#              [target_2] with length of len(s+s), and use a slide window of length len(s) to mimic Type-1 opeartion. Initially, check number of flips between [s] and 
+#              [target]s. Then start sliding by checking s[0] and s[len(s)], and reduce or increase current number of flips based on the comparison of [target]s. Track
+#              the minimum flips of all time
+# Time compleixty: O(N)
+def minFlips(s: str) -> int:
+    length = len(s)
+    s = s*2             # double [s] for slide
+    target_1 = "".join([str(i%2) for i in range(len(s))])           # create two possible [targets]
+    target_2 = "".join([str((i+1)%2) for i in range(len(s))])
+    curFlip_1 = curFlip_2 = 0           # intial number flips to both [target]s
+    for i in range(length):
+        if target_1[i] != s[i]:
+            curFlip_1 += 1
+        if target_2[i] != s[i]:
+            curFlip_2 += 1
+    res = min(curFlip_1, curFlip_2)
+    i, j = 0, length
+    while j<len(s):                     # slide window by removing s[i] and append s[j], and track [currFlip]s
+        if target_1[i] != s[i]:
+            curFlip_1 -= 1
+        if target_1[j] != s[j]:
+            curFlip_1 += 1
+        if target_2[i] != s[i]:
+            curFlip_2 -= 1
+        if target_2[j] != s[j]:
+            curFlip_2 += 1
+        i, j = i+1, j+1
+        res = min(res, curFlip_1, curFlip_2)        # track minimum flips of all time
+    return res
+
+# 140.416 Partition Equal Subset Sum ==================================================================== https://leetcode.com/problems/partition-equal-subset-sum/
+# Problem: Given a list of integers [nums], return True if [nums] can be splited into two parts, and the sum of both parts are equal. Return False otherwise.
+# Description: 0-1 knapsack that check if any sub-list can sum up to sum(nums)//2. Consider a Boolean 2D list [dp], that dp[i][j] represents whether exists a sub-list
+#              in nums[:i+1], that sum up to [j]. Thus, dp[i][j] is True, when 1) dp[i-1][j] is True (already exists a sublist that sum up to [j]), or
+#              2) dp[i-1][j-nums[i]] is True (a pre-existing sub-list combining with current nums[i] can sum up to [j])
+#              dp[0][0] is True intially, since if don't pick any number it sum up to 0. And dp[i] only depends on dp[i-1], we can update [dp] in-place and only allocate
+#              [dp] of size sum(nums)//2
+# Time compleixty: O(n*sum). n=len(nums) sum=sum(nums)
+def canPartition(nums: List[int]) -> bool:
+    s = sum(nums)
+    if s%2 == 1:            # odd sum can't be equally partitioned, return False
+        return False
+    half = s//2
+    dp = [True]+[False]*half
+    for i in range(len(nums)):
+        # use python trick to update [dp] in place, otherwise need to track dp[i-1] and dp[i]
+        dp = [dp[j] or (j>=nums[i] and dp[j-nums[i]]) for j in range(half+1)]
+        if dp[half]:                # half sum can be partitioned, early return
+            return True
+    return False
