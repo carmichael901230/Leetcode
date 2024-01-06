@@ -1,5 +1,6 @@
-import collections
 from typing import *        # enable type hint
+from collections import defaultdict, Counter, deque
+
 class ListNode:
     def __init__(self, val=0, next=None) -> None:
         self.next = next
@@ -217,7 +218,6 @@ def mergeTwoLists1(l1, l2):
 # Description: The uncommon words are the words that only appear once in both sentences, then all I need to do is
 #              combine two sentences and count occurrence of each word, if count of a word is one, then this word is uncommon
 #              Counter() return a dictionary, where [word] is key and [occurrence] is value 
-from collections import Counter
 def uncommonFromSentences(A, B):
     cnt = Counter((A + " " + B).split())        # combine two sentences and split each word and count their occurrence  
     uncommon = []                               # the cnt is a dictionary where key is [word] and value is [occurrence]
@@ -1164,7 +1164,6 @@ def _rec(head, prev):
 # Problem: Given a list of integers, find if the list contains any dulicated element. Return True, if contains duplicate, otherwise return False
 # Description: Use "Counter" to count occurence of each number, then iterate though values in [cnt] return Ture if a value is larger than 1.
 # Time Complexity: O(n)
-from collections import Counter
 def containsDuplicate(nums: List[int]) -> bool:
     cnt = Counter(nums)             # count [nums]
     for v in cnt.values():                
@@ -1200,7 +1199,7 @@ def containsNearbyDuplicate(nums, k):
 # Time Complexity: push()=>O(n) pop()&top()&empty()=>O(1)
 class MyStack:
 	def __init__(self):
-		self._queue = collections.deque()
+		self._queue = deque()
 	def push(self, x: int) -> None:
 		self._queue.append(x)
 		for _ in range(len(self._queue)-1):
@@ -2218,7 +2217,6 @@ def postorder_helper(root, res):
 # Description: Use "Counter" to put value of array and its count into hashmap. Look for values that is differed
 #              by 1, sum up count of values that are differed by 1. Maintain the maximum count and return
 #              at last
-from collections import Counter
 def findLHS(nums):
     count = Counter(nums)
     res = 0
@@ -2420,7 +2418,7 @@ def findTarget(root, k):
 # Description: If the robot returns back, means the number of [L]s is equal to number of [R]s, the number of [D]s is equal to number of [U]s,
 #              Thus use collections.Counter() to count the nunber of each moves, and compare the number
 def judgeCircle(moves):
-    c = collections.Counter(moves)
+    c = Counter(moves)
     return c["L"] == c["R"] and c["D"] == c["U"]
 
 # 117.661 Image Smoother
@@ -2601,7 +2599,6 @@ def calPoints(ops):
 #              append its subordinates to [relation] and add [importance] to result. Keep doing this, until [relation] is empty
 # Time Complexity: O(n)
 # Space Comlexity: O(n)
-from collections import deque
 def getImportance(employees, id):
     lookup = {}
     for e in employees:
@@ -3010,7 +3007,6 @@ def shortestCompletingWord(licensePlate: str, words: List[str]) -> str:
 # Shorter version with Counter
 # Description: use "Counter()" on [licensePlate] after filter out non-alphabets to get [plate]. Use "Counter()" on every [word], and use "&" on 
 #              "Counter(word) & plate" to get "intersection" of them, if the intersection is same as [plate], means [word] contains completing word
-from collections import Counter
 def shortestCompletingWord_2(licensePlate: str, words: List[str]) -> str:
     plate = Counter([c for c in licensePlate.lower() if c.isalpha()])
     return min([word for word in words if (Counter(word) & plate) == plate], key=len)
@@ -3162,7 +3158,6 @@ def numberOfLines(widths: List[int], s: str) -> List[int]:
 #              Extract integer number as [visited], construct all possoble subdomains by iterating from index 1 to len(domains), where subdomains are 
 #              "."join(domains[i:]). Record number of visits to subdomains in Counter(). At the end, convert Counter() object to list and return
 # Time complexity: O(n)
-from collections import Counter
 def subdomainVisits(cpdomains: List[str]) -> List[str]:
     record = Counter()
     for ele in cpdomains:
@@ -3267,7 +3262,6 @@ def shiftGrid(grid: List[List[int]], k: int) -> List[List[int]]:
 # Description: BFS. Start from [rCenter, cCenter], do bfs and append 4-way connected cells to [res]. Maintain a set [visited] to track 
 #              if cell is visited, and only search on un-visited cells
 # Time Complexity: O(rows*cols)
-from collections import deque
 def allCellsDistOrder(rows: int, cols: int, rCenter: int, cCenter: int) -> List[List[int]]:
     visited, res = set(), []
     queue = deque()
@@ -3340,3 +3334,32 @@ def valid_tree(n, edges):
             dfs(child)
     dfs(0)
     return len(visited) == n            # all nodes should be visited
+
+# 159.743 Network Delay Time =============================================================== https://leetcode.com/problems/network-delay-time
+# Problem: Given a network of [n] node, labeled from 1 to [n]. Also given a list of [times], that times[i] = (beg, end, cost) representing 
+#          the travel time "cost" from node "beg" to node "end". We will send a singal from given node [k]. Return the minimum travel time 
+#          for all [n] nodes to received the signal. Return -1 if it is impossible to send signal to all nodes
+# Description: Dijkstra's Algorithm with MinHeap. Create a adjacency [graph] as a dict, where key is source node and value is a list of 
+#              children and the cost from source node to child nodes. Create a MinHeap in the format of (currentAccumulateTime, currentNode),
+#              initially Heap contains (0, k), as k is the starting point and it has no cost to reach [k]. Pop heap and visit currentNode, 
+#              if it is not visited. Denote currentNode as visited, and track the maximum of currentAccumulateTime. Get children and cost of 
+#              currentNode from [graph], push (currentTime+timeToChild, child) to heap. Return maximum if all nodes are visited, else -1
+#              Note: The reason using Heap is to visit a node in minimum cost. Because Heap will pops item with least currentAccumulateTime 
+#                    at first. And other path to the node will not be checked again, since currentNode is visited
+# In short: Create a adjacency graph that denotes the children of each node and the cost to each child. BFS with MinHeap as queue to find 
+#           minimum time to each node. Return the maximum time to a node if all nodes are visited
+def networkDelayTime(times: List[List[int]], n: int, k: int) -> int:
+    graph = defaultdict(list)
+    for beg, end, cost in times:            # construct adjacency graph as {begNode: [(childNode1, cost1), (childNode2, cost2)]}
+        graph[beg].append((end, cost))
+    queue = [(0, k)]        # start from [k] with no cost
+    visited = set()         # track visited nodes
+    res = 0
+    while queue:
+        cost, currentNode = heapq.heappop(queue)       # pop a node with minimum cost to visit
+        if currentNode not in visited:
+            visited.add(currentNode)
+            res = max(res, cost)                # track maximum cost to a node
+            for child, timeToNode in graph[currentNode]:       
+                heapq.heappush(queue, (cost+timeToNode, child))     # push childNode of currentNode, the cost of childNode is acclumuateCost so far
+    return res if len(visited) == n else -1         # return [res] if all nodes are visited
